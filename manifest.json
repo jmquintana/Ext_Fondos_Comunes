@@ -1,0 +1,21 @@
+{
+    "manifest_version": 2,
+    "name": "Fondos Comunes Santander",
+    "version": "0.0.1",
+    "description": "Herramiento para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
+    "icons": {
+        "128": "icons/128.png",
+        "48": "icons/48.png",
+        "32": "icons/32.png",
+        "16": "icons/16.png"
+    },
+    "content_scripts": [{
+        "js": ["inject.js"],
+        "matches": ["https://www2.personas.santander.com.ar/*"]
+    }],
+    "permissions": [
+        "storage",
+        "downloads"
+    ],
+    "web_accessible_resources": ["script.js"]
+}
