@@ -17,5 +17,5 @@
         "storage",
         "downloads"
     ],
-    "web_accessible_resources": ["script.js"]
+    "web_accessible_resources": ["script.js", "moment.min.js"]
 }

@@ -7,7 +7,7 @@ function tablaDia() {
     let hoy = fecha(new Date);
     for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
         registro[i] = new Registro(
-            hoy,
+            moment(hoy).format('DD/MM/YYYY'),
             tablaHTML.children[i].children[0].textContent,
             tablaHTML.children[i].children[1].textContent,
             parseFloat(tablaHTML.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".")),
@@ -33,14 +33,20 @@ function leerLocalStorage() {
     return JSON.parse(localStorage.getItem('data'));
 }
 
-function guardarTabla() {
+function guardarTabla(tabla) {
     let data = leerLocalStorage();
-    if (data) {
-        let tabla = tablaDia();
-        for (var i = 0; i < tabla.length; i++) {
-            data.push(tabla[i]);
-            localStorage.setItem('data', JSON.stringify(data));
+    // let tabla = tablaDia();
+    if (data && tabla) {
+        for (var i = data.length - 1; i > -1; i--) {
+            console.log(data[i].fecha == tabla[0].fecha);
+            if (data[i].fecha == tabla[0].fecha) {
+                data.splice(i, 1);
+            }
         }
+        for (var i = 0; i < tabla.length; i++) {
+            data.unshift(tabla[i]);
+        }
+        localStorage.setItem('data', JSON.stringify(data));
     } else {
         localStorage.setItem('data', JSON.stringify(tablaDia()));
     }
@@ -48,7 +54,7 @@ function guardarTabla() {
 }
 
 function fecha(date) {
-    if (date.getHours() < 10) {
+    if (date.getHours() < 8) {
         date.setDate(date.getDate() - 1)
     }
     if (date.getDay() == 0) {
