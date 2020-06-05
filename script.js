@@ -54,7 +54,7 @@ function guardarTabla(tabla) {
 }
 
 function fecha(date) {
-    if (date.getHours() < 8) {
+    if (date.getHours() < 0) {
         date.setDate(date.getDate() - 1)
     }
     if (date.getDay() == 0) {
