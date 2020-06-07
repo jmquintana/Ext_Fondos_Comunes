@@ -1,13 +1,15 @@
 console.log('funciona')
-guardarTabla();
+// guardarTabla();
+moment.locale();
 
 function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     let registro = [];
-    let hoy = fecha(new Date);
+    let hoy = dia(moment(new Date));
+    // hoy = hoy;
     for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
         registro[i] = new Registro(
-            moment(hoy).format('DD/MM/YYYY'),
+            hoy,
             tablaHTML.children[i].children[0].textContent,
             tablaHTML.children[i].children[1].textContent,
             parseFloat(tablaHTML.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".")),
@@ -30,7 +32,13 @@ function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado
 }
 
 function leerLocalStorage() {
-    return JSON.parse(localStorage.getItem('data'));
+    let data = JSON.parse(localStorage.getItem('data'));
+    if (data) {
+        for (var i = 0; i < data.length; i++) {
+            data[i].fecha = moment(data[i].fecha);
+        }
+    }
+    return data
 }
 
 function guardarTabla(tabla) {
@@ -38,8 +46,8 @@ function guardarTabla(tabla) {
     // let tabla = tablaDia();
     if (data && tabla) {
         for (var i = data.length - 1; i > -1; i--) {
-            console.log(data[i].fecha == tabla[0].fecha);
-            if (data[i].fecha == tabla[0].fecha) {
+            console.log(data[i].fecha.format('DD/MM/YYYY') == tabla[0].fecha.format('DD/MM/YYYY'));
+            if (data[i].fecha.format('DD/MM/YYYY') == tabla[0].fecha.format('DD/MM/YYYY')) {
                 data.splice(i, 1);
             }
         }
@@ -47,20 +55,21 @@ function guardarTabla(tabla) {
             data.unshift(tabla[i]);
         }
         localStorage.setItem('data', JSON.stringify(data));
-    } else {
-        localStorage.setItem('data', JSON.stringify(tablaDia()));
+    } else if (!data) {
+        localStorage.setItem('data', JSON.stringify(tabla));
     }
     console.log('Se guardaron los datos en la memoria.');
 }
 
-function fecha(date) {
-    if (date.getHours() < 0) {
-        date.setDate(date.getDate() - 1)
+function dia(date) {
+    // var date = moment(date);
+    if (date.hour() < 0) {
+        date.subtract(1, 'day')
     }
-    if (date.getDay() == 0) {
-        date.setDate(date.getDate() + 1);
-    } else if (date.getDay() == 6) {
-        date.setDate(date.getDate() + 2);
+    if (date.day() == 0) {
+        date.add(1, 'day');
+    } else if (date.day() == 6) {
+        date.add(2, 'day');
     }
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)
+    return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
 }
