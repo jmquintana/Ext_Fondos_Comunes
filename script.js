@@ -1,6 +1,5 @@
-console.log('funciona')
+console.log('funciona script.js')
 // guardarTabla();
-moment.locale();
 
 function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
@@ -73,3 +72,12 @@ function dia(date) {
     }
     return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
 }
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    console.log('dentro del ready');
+    var descargar = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer");
+    var btn = document.createElement("a");
+    descargar.appendChild(btn);
+    btn.id = "btnExt";
+    btn.innerText = "Guardar";
+});
