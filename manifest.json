@@ -11,11 +11,12 @@
     },
     "content_scripts": [{
         "js": ["inject.js"],
+        "css": ["style.css"],
         "matches": ["https://www2.personas.santander.com.ar/*"]
     }],
     "permissions": [
         "storage",
         "downloads"
     ],
-    "web_accessible_resources": ["jquery.min.js", "script.js", "moment.min.js"]
+    "web_accessible_resources": ["jquery.min.js", "script.js", "styles.css", "moment.min.js", "https://cdn.jsdelivr.net/npm/chart.js@2.8.0"]
 }

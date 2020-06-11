@@ -1,0 +1,6 @@
+canvas#chart {
+    position: relative;
+    margin: auto;
+    height: 40vh;
+    width: 60vw;
+}
