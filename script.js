@@ -62,7 +62,7 @@ function guardarTabla(tabla) {
 
 function dia(date) {
     // var date = moment(date);
-    if (date.hour() < 0) {
+    if (date.hour() < 9) {
         date.subtract(1, 'day')
     }
     if (date.day() == 0) {
