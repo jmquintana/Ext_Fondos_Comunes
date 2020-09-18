@@ -81,3 +81,29 @@ document.addEventListener("DOMContentLoaded", function (event) {
     btn.id = "btnExt";
     btn.innerText = "Guardar";
 });
+
+
+
+function traer(year) {
+    fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
+        .then(data => data.json())
+}
+
+async function traerAsync(year) {
+    try {
+        const resPost = await fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
+        // const feriados = resPost.json()
+        console.log(resPost.json());
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function esFeriado(fecha) {
+    var feriados = await traerAsync(fecha.getFullYear())
+    // var feriados = await traer(fecha.getFullYear())
+    for (var i = 0; i < feriados.lenght; i++) {
+        feriados[i].fecha = moment(2020, feriados[i].mes, feriados[i].dia, 0, 0, 0, 0);
+    }
+    console.log(feriados);
+}
