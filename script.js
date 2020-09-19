@@ -20,6 +20,47 @@ function tablaDia() {
     return registro
 }
 
+document.addEventListener("mouseup", acciones, false);
+
+function acciones(e) {
+    if (e.which == 2) {
+        e.preventDefault();
+        guardarTabla(tablaDia());
+        mostrarPorcentajeVariacion(variacionResultado());
+    }
+}
+
+const resultadoTotal = array => array.reduce((acumulador, { resultado }) => acumulador + resultado, 0);
+
+function variacionResultado() {
+    const resultadoHoy = resultadoTotal(tablaDia());
+    const tabla = leerLocalStorage();
+    const hoy = tablaDia()[0].fecha;
+    const fechasAnteriores = tabla.map(el => el.fecha).filter(el => el.isBefore(hoy));
+    const diaAnterior = moment.max(fechasAnteriores);
+    const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
+    const resultadoAnterior = resultadoTotal(datosAnteriores);
+
+    return (resultadoHoy - resultadoAnterior) / resultadoAnterior * 100;
+}
+
+function mostrarPorcentajeVariacion(variacion) {
+    const total = document.querySelector("table > tbody > tr.totales > th:nth-child(7)");
+    const number = parseFloat(variacion).toFixed(2) + "%"
+
+    if (variacion >= 0) {
+        total.innerText = "+" + number
+        total.style.color = "limegreen"
+    } else {
+        total.innerText = number
+        total.style.color = "red"
+    };
+
+    total.style.textAlign = "center"
+    total.style.fontSize = "18px"
+}
+
+
 function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado) {
     this.fecha = fecha;
     this.tipo = tipo;
