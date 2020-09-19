@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Fondos Comunes Santander",
     "version": "0.0.1",
-    "description": "Herramiento para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
+    "description": "Herramienta para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
     "icons": {
         "128": "icons/128.png",
         "48": "icons/48.png",
@@ -18,5 +18,5 @@
         "storage",
         "downloads"
     ],
-    "web_accessible_resources": ["jquery.min.js", "script.js", "styles.css", "moment.min.js", "https://cdn.jsdelivr.net/npm/chart.js@2.8.0"]
+    "web_accessible_resources": ["jquery.min.js", "script.js", "styles.css", "moment.min.js", "https://cdn.jsdelivr.net/npm/chart.js@2.8.0", "https://cdn.plot.ly/plotly-latest.min.js"]
 }

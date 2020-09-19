@@ -30,7 +30,7 @@ function acciones(e) {
     }
 }
 
-const resultadoTotal = array => array.reduce((acumulador, { resultado }) => acumulador + resultado, 0);
+const resultadoTotal = array => array.reduce((acumulador, { tenencia }) => acumulador + tenencia, 0);
 
 function variacionResultado() {
     const resultadoHoy = resultadoTotal(tablaDia());
@@ -41,23 +41,27 @@ function variacionResultado() {
     const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
     const resultadoAnterior = resultadoTotal(datosAnteriores);
 
-    return (resultadoHoy - resultadoAnterior) / resultadoAnterior * 100;
+    return {
+        abs: (resultadoHoy - resultadoAnterior),
+        rel: (resultadoHoy - resultadoAnterior) / resultadoAnterior * 100,
+    };
 }
 
 function mostrarPorcentajeVariacion(variacion) {
     const total = document.querySelector("table > tbody > tr.totales > th:nth-child(7)");
-    const number = parseFloat(variacion).toFixed(2) + "%"
+    const abs = parseFloat(variacion.abs).toLocaleString('es-ES', { minimumFractionDigits: 2 });
+    const rel = parseFloat(variacion.rel).toLocaleString('es-ES', { minimumFractionDigits: 2 }) + "%";
 
-    if (variacion >= 0) {
-        total.innerText = "+" + number
+    if (variacion.abs >= 0) {
+        total.innerText = `+$${abs} (+${rel})`
         total.style.color = "limegreen"
     } else {
-        total.innerText = number
+        total.innerText = `$${abs} (${rel})`
         total.style.color = "red"
     };
 
     total.style.textAlign = "center"
-    total.style.fontSize = "18px"
+    total.style.fontSize = "16px"
 }
 
 
