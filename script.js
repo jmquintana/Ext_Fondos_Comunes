@@ -22,20 +22,21 @@ async function tablaDia() {
 
 document.addEventListener("mouseup", acciones, false);
 
-function acciones(e) {
-    if (e.which == 2) {
+async function acciones(e) {
+    if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         e.preventDefault();
-        guardarTabla(tablaDia());
-        mostrarPorcentajeVariacion(variacionResultado());
+        guardarTabla(await tablaDia());
+        mostrarPorcentajeVariacion(await variacionResultado());
     }
 }
 
 const resultadoTotal = array => array.reduce((acumulador, { tenencia }) => acumulador + tenencia, 0);
 
-function variacionResultado() {
-    const resultadoHoy = resultadoTotal(tablaDia());
+async function variacionResultado() {
+    const tablaD = await tablaDia();
+    const resultadoHoy = resultadoTotal(tablaD);
     const tabla = leerLocalStorage();
-    const hoy = tablaDia()[0].fecha;
+    const hoy = tablaD[0].fecha;
     const fechasAnteriores = tabla.map(el => el.fecha).filter(el => el.isBefore(hoy));
     const diaAnterior = moment.max(fechasAnteriores);
     const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
@@ -49,14 +50,14 @@ function variacionResultado() {
 
 function mostrarPorcentajeVariacion(variacion) {
     const total = document.querySelector("table > tbody > tr.totales > th:nth-child(7)");
-    const rel = parseFloat(variacion.rel).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
-    const abs = parseFloat(variacion.abs).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const abs = variacion.abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const rel = variacion.rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     if (variacion.abs >= 0) {
-        total.innerText = `+$${abs} (+${rel})`
+        total.innerText = `$+${abs} (+${rel}%)`
         total.style.color = "limegreen"
     } else {
-        total.innerText = `$${abs} (${rel})`
+        total.innerText = `$${abs} (${rel}%)`
         total.style.color = "red"
     };
 
@@ -117,7 +118,7 @@ function dia(date) {
     return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
 }
 
-//test de funcion dia considerando feriados
+//funcion dia considerando feriados
 async function diaF(date) {
     //date debe ser de tipo moment
     let fecha = date.format("YYYY-MM-DD");
