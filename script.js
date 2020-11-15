@@ -120,8 +120,6 @@ function dia(date) {
 //test de funcion dia considerando feriados
 async function diaF(date) {
     //date debe ser de tipo moment
-    // console.log(date);
-    // let dia = date.date();
     let fecha = date.format("YYYY-MM-DD");
     if (date.hour() < 9) {
         date.subtract(1, 'day');
@@ -162,17 +160,6 @@ function traer(year = 2020) {
         .catch(err => console.error(err));
 }
 
-// async function traerAsync(year) {
-//     try {
-//         const resPost = await fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
-//         // const feriados = resPost.json()
-//         console.log(resPost.json());
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
-
-//esFeriado es la funcion que anda
 function esFeriado(fecha) {
     let dia = moment(fecha);
     let year = fecha.getFullYear();
@@ -193,28 +180,3 @@ async function isFeriado(fecha) {
     let filtrado = feriadosMoment.filter(el => el.isSame(dia));
     return filtrado.length
 }
-
-// function isFeriado(fecha) {
-//     const dia = moment(fecha);
-//     const year = fecha.getFullYear();
-//     return traer(year)
-//         .then(data => data.json())
-//         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
-//         .then(res => (res.filter(el => el.isSame(dia)).length === 1))
-//         .then(res => console.log(res))
-//         .catch(err => console.error(err));
-// }
-
-// async function esFeriado(fecha) {
-//     let year = fecha.getFullYear();
-//     let feriados = await traer(year)
-    // var feriados = await traer(fecha.getFullYear())
-
-    // for (var i = 0; i < feriados.lenght; i++) {
-    //     feriados[i].fecha = moment([year, feriados[i].mes, feriados[i].dia, 0, 0, 0, 0]);
-    // }
-
-    // let diasFeriados = await feriados.forEach(el => el.fecha = moment([year, el.mes, el.dia, 0, 0, 0, 0])).then(res => console.log(res));
-    // diasFeriados = feriados.map(el => el.fecha)
-    // console.log(feriados.forEach(el => el.fecha = moment([year, el.mes, el.dia, 0, 0, 0, 0])).then(res => console.log(res)));
-// }
