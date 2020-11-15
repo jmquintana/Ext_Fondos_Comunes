@@ -1,10 +1,10 @@
 console.log('funciona script.js')
 // guardarTabla();
 
-function tablaDia() {
+async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     let registro = [];
-    let hoy = dia(moment(new Date));
+    let hoy = await diaF(moment(new Date));
     // hoy = hoy;
     for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
         registro[i] = new Registro(
@@ -134,12 +134,12 @@ async function diaF(date) {
     let esDiaFeriado = await isFeriado(moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])._d);
     if (esDiaFeriado) {
         // console.log('es feriado');
-        diaF(moment([date.year(), date.month(), date.date(), 9, 0, 0, 0]).add(1, 'day'));
+        return diaF(moment([date.year(), date.month(), date.date(), 9, 0, 0, 0]).add(1, 'day'));
 
     } else {
         fecha = date.format("YYYY-MM-DD");
-        console.log(fecha);
-        return fecha
+        // console.log(fecha);
+        return moment([date.year(), date.month(), date.date(), 9, 0, 0, 0])
     }
 }
 
