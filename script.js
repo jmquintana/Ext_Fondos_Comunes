@@ -105,7 +105,7 @@ function guardarTabla(tabla) {
 }
 
 function dia(date) {
-    // var date = moment(date);
+    //date debe ser de tipo moment
     if (date.hour() < 9) {
         date.subtract(1, 'day')
     }
@@ -117,6 +117,34 @@ function dia(date) {
     return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
 }
 
+//test de funcion dia considerando feriados
+async function diaF(date) {
+    //date debe ser de tipo moment
+    // console.log(date);
+    // let dia = date.date();
+    let fecha = date.format("YYYY-MM-DD");
+    if (date.hour() < 9) {
+        date.subtract(1, 'day');
+    }
+    if (date.day() == 6) {
+        // console.log('es sabado');
+        date.add(2, 'day');
+    } else if (date.day() == 0) {
+        // console.log('es domingo');
+        date.add(1, 'day');
+    }
+    let esDiaFeriado = await isFeriado(moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])._d);
+    if (esDiaFeriado) {
+        // console.log('es feriado');
+        diaF(moment([date.year(), date.month(), date.date(), 9, 0, 0, 0]).add(1, 'day'));
+
+    } else {
+        fecha = date.format("YYYY-MM-DD");
+        console.log(fecha);
+        return fecha
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function (event) {
     console.log('dentro del ready');
     var descargar = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer");
@@ -126,11 +154,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
     btn.innerText = "Guardar";
 });
 
-function traer(year) {
+function traer(year = 2020) {
     fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
         .then(data => data.json())
         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
-        // .then(res => console.log(res))
+        .then(res => console.log(res))
         .catch(err => console.error(err));
 }
 
@@ -144,23 +172,38 @@ function traer(year) {
 //     }
 // }
 
+//esFeriado es la funcion que anda
 function esFeriado(fecha) {
     let dia = moment(fecha);
     let year = fecha.getFullYear();
-    fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
+    return fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
         .then(data => data.json())
         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
-        .then(res => console.log((res.filter(el => el.isSame(dia)).length == 1)))
+        .then(res => (res.filter(el => el.isSame(dia)).length))
+        // .then(res => console.log(res))
         .catch(err => console.error(err));
 }
 
 async function isFeriado(fecha) {
     let dia = moment(fecha);
     let year = fecha.getFullYear();
-    await traer(year)
-        .then(res => console.log((res.filter(el => el.isSame(dia)).length == 1)))
-        .catch(err => console.error(err));
+    let feriados = await fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
+    let feriadosJson = await feriados.json();
+    let feriadosMoment = feriadosJson.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0]));
+    let filtrado = feriadosMoment.filter(el => el.isSame(dia));
+    return filtrado.length
 }
+
+// function isFeriado(fecha) {
+//     const dia = moment(fecha);
+//     const year = fecha.getFullYear();
+//     return traer(year)
+//         .then(data => data.json())
+//         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
+//         .then(res => (res.filter(el => el.isSame(dia)).length === 1))
+//         .then(res => console.log(res))
+//         .catch(err => console.error(err));
+// }
 
 // async function esFeriado(fecha) {
 //     let year = fecha.getFullYear();
