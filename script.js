@@ -1,5 +1,16 @@
 console.log('funciona script.js')
 // guardarTabla();
+document.addEventListener("mouseup", acciones, false);
+
+function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado) {
+    this.fecha = fecha;
+    this.tipo = tipo;
+    this.fondo = fondo;
+    this.cuotapartes = cuotapartes;
+    this.valor_cp = valor_cp;
+    this.tenencia = tenencia;
+    this.resultado = resultado;
+}
 
 async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
@@ -19,8 +30,6 @@ async function tablaDia() {
     }
     return registro
 }
-
-document.addEventListener("mouseup", acciones, false);
 
 async function acciones(e) {
     if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
@@ -65,16 +74,6 @@ function mostrarPorcentajeVariacion(variacion) {
     total.style.fontSize = "16px"
 }
 
-function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado) {
-    this.fecha = fecha;
-    this.tipo = tipo;
-    this.fondo = fondo;
-    this.cuotapartes = cuotapartes;
-    this.valor_cp = valor_cp;
-    this.tenencia = tenencia;
-    this.resultado = resultado;
-}
-
 function leerLocalStorage() {
     let data = JSON.parse(localStorage.getItem('data'));
     if (data) {
@@ -86,25 +85,15 @@ function leerLocalStorage() {
 }
 
 function guardarTabla(tabla) {
-    let data = leerLocalStorage();
-    // let tabla = tablaDia();
-    if (data && tabla) {
-        for (var i = data.length - 1; i > -1; i--) {
-            console.log(data[i].fecha.format('DD/MM/YYYY') == tabla[0].fecha.format('DD/MM/YYYY'));
-            if (data[i].fecha.format('DD/MM/YYYY') == tabla[0].fecha.format('DD/MM/YYYY')) {
-                data.splice(i, 1);
-            }
-        }
-        for (var i = 0; i < tabla.length; i++) {
-            data.unshift(tabla[i]);
-        }
-        localStorage.setItem('data', JSON.stringify(data));
-    } else if (!data) {
-        localStorage.setItem('data', JSON.stringify(tabla));
-    }
+    const data = leerLocalStorage();
+    const dataFiltro = data.filter(el => !el.fecha.format('DD/MM/YYYY') == tabla[0].fecha.format('DD/MM/YYYY'));
+    if (tabla)
+        tabla.forEach(el => dataFiltro.unshift(el));
+    localStorage.setItem('data', JSON.stringify(data));
     console.log('Se guardaron los datos en la memoria.');
 }
 
+//ya no se usa, la funcion diaF contempla los feriados
 function dia(date) {
     //date debe ser de tipo moment
     if (date.hour() < 9) {
@@ -118,7 +107,7 @@ function dia(date) {
     return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
 }
 
-//funcion dia considerando feriados
+//funcion diaF contempla días feriados
 async function diaF(date) {
     //date debe ser de tipo moment
     let fecha = date.format("YYYY-MM-DD");
