@@ -33,20 +33,27 @@ async function tablaDia() {
 async function acciones(e) {
     if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         e.preventDefault();
-        guardarTabla(await tablaDia());
+        let tablaD = await tablaDia();
+        guardarTabla(tablaD);
         mostrarRendimientoFondo();
-        mostrarPorcentajeVariacion(variacionResultado(await tablaDia()));
+        mostrarPorcentajeVariacion(variacionResultado(tablaD));
     }
 }
 
 async function mostrarRendimientoFondo() {
-    const tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     const tablaD = await tablaDia();
+    const tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
+    const ultimaCol = document.querySelector("table > thead > tr > th.head-right.last");
+    ultimaCol.style.textAlign = "left"
+    ultimaCol.textContent = 'Resultado Diario (%)';
+    const botones = document.querySelectorAll("obp-boton > button");
     for (i = 1; i < tablaHTML.childElementCount; i++) {
         let fondo = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(2)`).innerText;
         let totalFondoElm = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(7)`);
         let btn = document.querySelector(`table > tbody > tr:nth-child(${i}) > td.action.body-right > obp-boton`);
         let { abs, rel } = variacionResultado(tablaD, fondo);
+        let a = abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        let r = rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
         const prevVal = document.querySelector(`#val${i}`);
         if (prevVal)
             prevVal.remove()
@@ -55,17 +62,17 @@ async function mostrarRendimientoFondo() {
         if (abs >= 0) {
             // totalFondoElm.innerText = `+${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
             totalFondoElm.insertBefore(val, btn);
-            val.innerText = `+${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+            val.innerText = `+${a} (+${r}%)`;
             val.style.color = "limegreen"
             val.style.padding = '10px';
         } else {
             // totalFondoElm.innerText = `${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
             totalFondoElm.insertBefore(val, btn);
-            val.innerText = `${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+            val.innerText = `${a} (${r}%)`;
             val.style.color = "red"
             val.style.padding = '10px';
         };
-        totalFondoElm.style.textAlign = "right"
+        totalFondoElm.style.textAlign = "left"
     }
 }
 
@@ -97,15 +104,15 @@ function mostrarPorcentajeVariacion(variacion) {
     const rel = variacion.rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     if (variacion.abs >= 0) {
-        total.innerText = `$+${abs} (+${rel}%)`
+        total.innerText = `+${abs} (+${rel}%)`
         total.style.color = "limegreen"
     } else {
-        total.innerText = `$${abs} (${rel}%)`
+        total.innerText = `${abs} (${rel}%)`
         total.style.color = "red"
     };
 
-    total.style.textAlign = "center"
-    total.style.fontSize = "16px"
+    total.style.textAlign = "left"
+    // total.style.fontSize = "16px"
 }
 
 function leerLocalStorage() {
@@ -120,10 +127,10 @@ function leerLocalStorage() {
 
 function guardarTabla(tabla) {
     const data = leerLocalStorage();
-    const dataFiltro = data.filter(el => !el.fecha.format('DD/MM/YYYY') == tabla[0].fecha.format('DD/MM/YYYY'));
+    const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
     if (tabla)
         tabla.forEach(el => dataFiltro.unshift(el));
-    localStorage.setItem('data', JSON.stringify(data));
+    localStorage.setItem('data', JSON.stringify(dataFiltro));
     console.log('Se guardaron los datos en la memoria.');
 }
 
