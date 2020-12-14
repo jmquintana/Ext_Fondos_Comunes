@@ -16,16 +16,19 @@ async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     let registro = [];
     let hoy = await diaF(moment(new Date));
-    for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
-        registro[i] = new Registro(
-            hoy,
-            tablaHTML.children[i].children[0].textContent,
-            tablaHTML.children[i].children[1].textContent,
-            parseFloat(tablaHTML.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".")),
-            parseFloat(tablaHTML.children[i].children[3].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
-            parseFloat(tablaHTML.children[i].children[4].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
-            parseFloat(tablaHTML.children[i].children[5].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
-        )
+    if (tablaHTML) {
+
+        for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
+            registro[i] = new Registro(
+                hoy,
+                tablaHTML.children[i].children[0].textContent,
+                tablaHTML.children[i].children[1].textContent,
+                parseFloat(tablaHTML.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".")),
+                parseFloat(tablaHTML.children[i].children[3].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
+                parseFloat(tablaHTML.children[i].children[4].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
+                parseFloat(tablaHTML.children[i].children[5].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
+            )
+        }
     }
     return registro
 }
@@ -44,35 +47,40 @@ async function mostrarRendimientoFondo() {
     const tablaD = await tablaDia();
     const tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     const ultimaCol = document.querySelector("table > thead > tr > th.head-right.last");
-    ultimaCol.style.textAlign = "left"
-    ultimaCol.textContent = 'Resultado Diario (%)';
-    const botones = document.querySelectorAll("obp-boton > button");
-    for (i = 1; i < tablaHTML.childElementCount; i++) {
-        let fondo = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(2)`).innerText;
-        let totalFondoElm = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(7)`);
-        let btn = document.querySelector(`table > tbody > tr:nth-child(${i}) > td.action.body-right > obp-boton`);
-        let { abs, rel } = variacionResultado(tablaD, fondo);
-        let a = abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        let r = rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        const prevVal = document.querySelector(`#val${i}`);
-        if (prevVal)
-            prevVal.remove()
-        const val = document.createElement("a");
-        val.id = `val${i}`;
-        if (abs >= 0) {
-            // totalFondoElm.innerText = `+${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-            totalFondoElm.insertBefore(val, btn);
-            val.innerText = `+${a} (+${r}%)`;
-            val.style.color = "limegreen"
-            val.style.padding = '10px';
-        } else {
-            // totalFondoElm.innerText = `${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-            totalFondoElm.insertBefore(val, btn);
-            val.innerText = `${a} (${r}%)`;
-            val.style.color = "red"
-            val.style.padding = '10px';
-        };
-        totalFondoElm.style.textAlign = "left"
+    if (ultimaCol) {
+        ultimaCol.style.textAlign = "left"
+        ultimaCol.textContent = 'Resultado Diario (%)';
+    }
+    // const botones = document.querySelectorAll("obp-boton > button");
+    if (tablaHTML) {
+
+        for (i = 1; i < tablaHTML.childElementCount; i++) {
+            let fondo = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(2)`).innerText;
+            let totalFondoElm = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(7)`);
+            let btn = document.querySelector(`table > tbody > tr:nth-child(${i}) > td.action.body-right > obp-boton`);
+            let { abs, rel } = variacionResultado(tablaD, fondo);
+            let a = abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            let r = rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            const prevVal = document.querySelector(`#val${i}`);
+            if (prevVal)
+                prevVal.remove()
+            const val = document.createElement("a");
+            val.id = `val${i}`;
+            if (abs >= 0) {
+                // totalFondoElm.innerText = `+${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                totalFondoElm.insertBefore(val, btn);
+                val.innerText = `+${a} (+${r}%)`;
+                val.style.color = "limegreen"
+                val.style.padding = '10px';
+            } else {
+                // totalFondoElm.innerText = `${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                totalFondoElm.insertBefore(val, btn);
+                val.innerText = `${a} (${r}%)`;
+                val.style.color = "red"
+                val.style.padding = '10px';
+            };
+            totalFondoElm.style.textAlign = "left"
+        }
     }
 }
 
@@ -102,17 +110,18 @@ function mostrarPorcentajeVariacion(variacion) {
     const total = document.querySelector("table > tbody > tr.totales > th:nth-child(7)");
     const abs = variacion.abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const rel = variacion.rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (total) {
+        if (variacion.abs >= 0) {
+            total.innerText = `+${abs} (+${rel}%)`
+            total.style.color = "limegreen"
+        } else {
+            total.innerText = `${abs} (${rel}%)`
+            total.style.color = "red"
+        };
 
-    if (variacion.abs >= 0) {
-        total.innerText = `+${abs} (+${rel}%)`
-        total.style.color = "limegreen"
-    } else {
-        total.innerText = `${abs} (${rel}%)`
-        total.style.color = "red"
-    };
-
-    total.style.textAlign = "left"
-    // total.style.fontSize = "16px"
+        total.style.textAlign = "left"
+        // total.style.fontSize = "16px"
+    }
 }
 
 function leerLocalStorage() {
