@@ -17,7 +17,6 @@ async function tablaDia() {
     let registro = [];
     let hoy = await diaF(moment(new Date));
     if (tablaHTML) {
-
         for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
             registro[i] = new Registro(
                 hoy,
@@ -40,6 +39,8 @@ async function acciones(e) {
         guardarTabla(tablaD);
         mostrarRendimientoFondo();
         mostrarPorcentajeVariacion(variacionResultado(tablaD));
+        const dia = await diaF(moment(new Date));
+        console.log(dia.format("DD-MM-YYYY"));
     }
 }
 
@@ -146,7 +147,7 @@ function guardarTabla(tabla) {
 //ya no se usa, la funcion diaF contempla los feriados
 function dia(date) {
     //date debe ser de tipo moment
-    if (date.hour() < 9) {
+    if (date.hour() < 8) {
         date.subtract(1, 'day')
     }
     if (date.day() == 0) {
@@ -161,7 +162,7 @@ function dia(date) {
 async function diaF(date) {
     //date debe ser de tipo moment
     let fecha = date.format("YYYY-MM-DD");
-    if (date.hour() < 9) {
+    if (date.hour() < 8) {
         date.subtract(1, 'day');
     }
     if (date.day() == 6) {
@@ -173,13 +174,13 @@ async function diaF(date) {
     }
     let esDiaFeriado = await isFeriado(moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])._d);
     if (esDiaFeriado) {
-        // console.log('es feriado');
-        return diaF(moment([date.year(), date.month(), date.date(), 9, 0, 0, 0]).add(1, 'day'));
+        console.log('es feriado');
+        return diaF(moment([date.year(), date.month(), date.date(), 8, 0, 0, 0]).add(1, 'day'));
 
     } else {
         fecha = date.format("YYYY-MM-DD");
         // console.log(fecha);
-        return moment([date.year(), date.month(), date.date(), 9, 0, 0, 0])
+        return moment([date.year(), date.month(), date.date(), 8, 0, 0, 0])
     }
 }
 
