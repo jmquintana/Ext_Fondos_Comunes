@@ -39,6 +39,7 @@ async function acciones(e) {
         guardarTabla(tablaD);
         mostrarRendimientoFondo();
         mostrarPorcentajeVariacion(variacionResultado(tablaD));
+        injectChart();
         const dia = await diaF(moment(new Date));
         console.log(dia.format("DD-MM-YYYY"));
     }
@@ -46,11 +47,12 @@ async function acciones(e) {
 
 async function mostrarRendimientoFondo() {
     const tablaD = await tablaDia();
+    const dia = await diaF(moment(new Date));
     const tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     const ultimaCol = document.querySelector("table > thead > tr > th.head-right.last");
     if (ultimaCol) {
         ultimaCol.style.textAlign = "left"
-        ultimaCol.textContent = 'Resultado Diario (%)';
+        ultimaCol.textContent = `Resultado Diario (%) ${dia.format("DD-MM-YYYY")}`;
     }
     // const botones = document.querySelectorAll("obp-boton > button");
     if (tablaHTML) {
@@ -220,4 +222,165 @@ async function isFeriado(fecha) {
     let feriadosMoment = feriadosJson.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0]));
     let filtrado = feriadosMoment.filter(el => el.isSame(dia));
     return filtrado.length
+}
+
+function getData() {
+    const data = localStorage.getItem('data')
+    // const data = await fetch('datos4.json').then(res => res.text());
+    const datos = JSON.parse(data).reverse()//.filter(el => el.fondo == 'Superfondo Acciones');
+    let array = {}
+    const etiquetas = [...new Set(datos.map(item => item.fondo))]
+    const fechas = datos.reduce((acc, { fecha, fondo, resultado }) => {
+        (acc[moment(fecha).format('DD-MM-YY')] || (acc[moment(fecha).format('DD-MM-YY')] = [])).push({ fondo, resultado })
+        return acc
+    }, {})
+
+    array.days = Object.keys(fechas)
+    array.labels = (etiquetas)
+    array.values = []
+    etiquetas.forEach((label) => {
+        let resultados = []
+        Object.keys(fechas).forEach(el => {
+            let valor = fechas[el].filter(elem => elem.fondo === label)[0]
+            if (valor) {
+                valor = valor.resultado
+            } else {
+                valor = null
+            }
+            resultados.push(valor)
+        })
+        array.values.push(resultados)
+    })
+    console.log({ array });
+
+    const { days, labels, values } = array
+    return { days, labels, values };
+}
+
+function injectChart() {
+    const footer = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer")
+    footer.style.height = "630px"
+    const div = document.createElement("div");
+    const prevChart = document.querySelector('div.chart-container2');
+    div.classList.add('chart-container2');
+    div.style.backgroundColor = 'white'
+    div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
+    if (prevChart) document.body.removeChild(prevChart);
+    footer.appendChild(div);
+
+
+    setup();
+
+}
+
+async function setup() {
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const data = getData();
+    const borderWidth = 1;
+    console.log(data);
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.days,
+            // labels: data.days1,
+            datasets:
+                [
+                    {
+                        label: data.labels[0],
+                        data: data.values[0],
+                        fill: false,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderWidth: borderWidth,
+                        spanGaps: true
+                    },
+                    {
+                        label: data.labels[1],
+                        data: data.values[1],
+                        fill: false,
+                        borderColor: 'rgba(99, 200, 132, 1)',
+                        backgroundColor: 'rgba(99, 200, 132, 0.5)',
+                        borderWidth: borderWidth,
+                        spanGaps: true
+                    },
+                    {
+                        label: data.labels[2],
+                        data: data.values[2],
+                        fill: false,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderWidth: borderWidth,
+                        spanGaps: true
+                    },
+                    {
+                        label: data.labels[3],
+                        data: data.values[3],
+                        fill: false,
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                        borderWidth: borderWidth,
+                        spanGaps: true
+                    }
+                ]
+        },
+        options: {
+            parsing: {
+                xAxisKey: 'cuotapartes',
+                yAxisKey: 'resultado'
+            },
+            tooltips: {
+                mode: 'x',
+                intersect: false,
+                titleFontSize: 18,
+                bodyFontSize: 14,
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2 });
+                    },
+                },
+                bodyAlign: 'right',
+                position: 'average'
+            },
+            elements: {
+                line: {
+                    tension: 0
+                },
+                point: {
+                    hoverRadius: 6,
+                    hitRadius: 1
+                }
+            },
+            legend: {
+                display: true
+            },
+            hover: {
+                mode: 'x',
+                intersect: false
+            }
+            // scales: {
+            //     xAxes: [{
+            //         type: 'time',
+            //         time: {
+            //             unit: 'day'
+            //         }
+            //     }]
+            // }
+        }
+    });
+
+    // const myChart2 = new Chart(ctx2, {
+    //     type: 'bar',
+    //     data: {
+    //         datasets: [{
+    //             data: [{ id: 'Sales', nested: { value: 1500 } }, { id: 'Purchases', nested: { value: 500 } }]
+    //         }]
+    //     },
+    //     options: {
+
+    //         parsing: {
+    //             xAxisKey: 'id',
+    //             yAxisKey: 'nested.value'
+    //         }
+    //     }
+    // });
 }
