@@ -231,7 +231,8 @@ function getData() {
     let array = {}
     const etiquetas = [...new Set(datos.map(item => item.fondo))]
     const fechas = datos.reduce((acc, { fecha, fondo, resultado }) => {
-        (acc[moment(fecha).format('DD-MM-YY')] || (acc[moment(fecha).format('DD-MM-YY')] = [])).push({ fondo, resultado })
+        // (acc[moment(fecha).format('DD-MM-YY')] || (acc[moment(fecha).format('DD-MM-YY')] = [])).push({ fondo, resultado })
+        (acc[fecha] || (acc[fecha] = [])).push({ fondo, resultado })
         return acc
     }, {})
 
@@ -261,16 +262,17 @@ function injectChart() {
     const footer = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer")
     footer.style.height = "630px"
     const div = document.createElement("div");
-    const prevChart = document.querySelector('div.chart-container2');
+    let prevChart = document.querySelector('div.chart-container2');
     div.classList.add('chart-container2');
     div.style.backgroundColor = 'white'
     div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
-    if (prevChart) document.body.removeChild(prevChart);
-    footer.appendChild(div);
-
-
+    // if (prevChart) footer.removeChild(prevChart);
+    if (!prevChart) {
+        footer.appendChild(div)
+    } else {
+        return
+    }
     setup();
-
 }
 
 async function setup() {
@@ -324,10 +326,10 @@ async function setup() {
                 ]
         },
         options: {
-            parsing: {
-                xAxisKey: 'cuotapartes',
-                yAxisKey: 'resultado'
-            },
+            // parsing: {
+            //     xAxisKey: 'cuotapartes',
+            //     yAxisKey: 'resultado'
+            // },
             tooltips: {
                 mode: 'x',
                 intersect: false,
@@ -356,15 +358,23 @@ async function setup() {
             hover: {
                 mode: 'x',
                 intersect: false
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: function (value, index, values) {
+                            return '$' + value.toLocaleString('de-DE');
+                        }
+                    }
+                }],
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'month'
+                    }
+                }]
             }
-            // scales: {
-            //     xAxes: [{
-            //         type: 'time',
-            //         time: {
-            //             unit: 'day'
-            //         }
-            //     }]
-            // }
         }
     });
 
