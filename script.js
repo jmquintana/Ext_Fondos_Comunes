@@ -336,9 +336,8 @@ async function setup() {
                 titleFontSize: 18,
                 bodyFontSize: 14,
                 callbacks: {
-                    label: function (tooltipItem, data) {
-                        return tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2 });
-                    },
+                    title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY'),
+                    label: tooltipItem => tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2 })
                 },
                 bodyAlign: 'right',
                 position: 'average'
@@ -363,12 +362,13 @@ async function setup() {
                 yAxes: [{
                     ticks: {
                         // Include a dollar sign in the ticks
-                        callback: function (value, index, values) {
-                            return '$' + value.toLocaleString('de-DE');
-                        }
+                        callback: value => `$ ${value.toLocaleString('de-DE')}`
                     }
                 }],
                 xAxes: [{
+                    ticks: {
+                        min: moment(await diaF(moment(new Date()))).subtract(60, 'days')
+                    },
                     type: 'time',
                     time: {
                         unit: 'month'
