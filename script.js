@@ -44,7 +44,7 @@ async function acciones(e) {
         injectChart();
         const dia = await diaF(moment(new Date));
         console.log(dia.format("DD-MM-YYYY"));
-        cargado = true;
+        cargado = false;
     }
 }
 
@@ -262,18 +262,37 @@ function getData() {
 function injectChart() {
     const footer = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer")
     footer.style.height = "650px"
-    const div = document.createElement("div");
-    const boton = document.createElement("button");
     let prevChart = document.querySelector('div.chart-container2');
+    const div = document.createElement("div");
+    const boton1 = document.createElement("button");
+    const boton2 = document.createElement("button");
+    const boton3 = document.createElement("button");
+    const boton4 = document.createElement("button");
     div.classList.add('chart-container2');
-    boton.textContent = 'Cambiar Escala';
-    boton.classList.add('toggleScale');
-    boton.style.margin = "5px";
-    div.style.backgroundColor = 'white'
+    boton1.textContent = '7d';
+    boton1.classList.add('toggleScale');
+    boton1.id = '7d';
+    boton1.style.margin = "5px";
+    boton2.textContent = '30d';
+    boton2.classList.add('toggleScale');
+    boton2.id = '30d';
+    boton2.style.margin = "5px";
+    boton3.textContent = '90d';
+    boton3.classList.add('toggleScale');
+    boton3.id = '90d';
+    boton3.style.margin = "5px";
+    boton4.textContent = 'Reset';
+    boton4.classList.add('toggleScale');
+    boton4.id = 'reset';
+    boton4.style.margin = "5px";
+    // div.style.backgroundColor = 'white'
     div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
     // if (prevChart) footer.removeChild(prevChart);
     if (!prevChart) {
-        footer.appendChild(boton)
+        footer.appendChild(boton1)
+        footer.appendChild(boton2)
+        footer.appendChild(boton3)
+        footer.appendChild(boton4)
         footer.appendChild(div)
     } else {
         return
@@ -395,18 +414,43 @@ async function setup() {
 
     const myChart = new Chart(ctx, config);
 
-    document.querySelector('.toggleScale').addEventListener('click', function () {
-        console.log('presionaste botón');
-        if (type === 'Todo') {
-            type = 'Filtrado'
-            myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(40, 'days');
-        } else {
-            type = 'Todo'
-            delete myChart.options.scales.xAxes[0].ticks.min;
-        };
-        myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
+    document.querySelectorAll('.toggleScale').forEach(elm => {
+        elm.addEventListener('click', function (e) {
+            console.log(e.target);
+            switch (e.target.id) {
+                case '7d':
+                    myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(7, 'days');
+                    type = 'Filtrado'
+                    // code block
+                    break;
+                case '30d':
+                    myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(30, 'days');
+                    type = 'Filtrado'
+                    // code block
+                    break;
+                case '90d':
+                    myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(90, 'days');
+                    type = 'Filtrado'
+                    // code block
+                    break;
+                case 'reset':
+                    delete myChart.options.scales.xAxes[0].ticks.min;
+                    type = 'Todo'
+                    // code block
+                    break;
+                default:
+                // code block
+            }
 
-        myChart.update();
+            console.log('presionaste botón');
+            // if (type === 'Todo') {
+            //     type = 'Filtrado'
+            // } else {
+            //     type = 'Todo'
+            // };
+            myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
+
+            myChart.update();
+        });
     });
-
 }
