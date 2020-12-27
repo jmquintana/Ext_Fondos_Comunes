@@ -32,8 +32,10 @@ async function tablaDia() {
     return registro
 }
 
+let cargado = false;
+
 async function acciones(e) {
-    if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
+    if (!cargado && e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         e.preventDefault();
         let tablaD = await tablaDia();
         guardarTabla(tablaD);
@@ -42,6 +44,7 @@ async function acciones(e) {
         injectChart();
         const dia = await diaF(moment(new Date));
         console.log(dia.format("DD-MM-YYYY"));
+        cargado = true;
     }
 }
 
@@ -226,12 +229,10 @@ async function isFeriado(fecha) {
 
 function getData() {
     const data = localStorage.getItem('data')
-    // const data = await fetch('datos4.json').then(res => res.text());
-    const datos = JSON.parse(data).reverse()//.filter(el => el.fondo == 'Superfondo Acciones');
+    const datos = JSON.parse(data).reverse()
     let array = {}
     const etiquetas = [...new Set(datos.map(item => item.fondo))]
     const fechas = datos.reduce((acc, { fecha, fondo, resultado }) => {
-        // (acc[moment(fecha).format('DD-MM-YY')] || (acc[moment(fecha).format('DD-MM-YY')] = [])).push({ fondo, resultado })
         (acc[fecha] || (acc[fecha] = [])).push({ fondo, resultado })
         return acc
     }, {})
@@ -240,7 +241,7 @@ function getData() {
     array.labels = (etiquetas)
     array.values = []
     etiquetas.forEach((label) => {
-        let resultados = []
+        let valores = []
         Object.keys(fechas).forEach(el => {
             let valor = fechas[el].filter(elem => elem.fondo === label)[0]
             if (valor) {
@@ -248,9 +249,9 @@ function getData() {
             } else {
                 valor = null
             }
-            resultados.push(valor)
+            valores.push(valor)
         })
-        array.values.push(resultados)
+        array.values.push(valores)
     })
     console.log({ array });
 
@@ -260,14 +261,19 @@ function getData() {
 
 function injectChart() {
     const footer = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer")
-    footer.style.height = "630px"
+    footer.style.height = "650px"
     const div = document.createElement("div");
+    const boton = document.createElement("button");
     let prevChart = document.querySelector('div.chart-container2');
     div.classList.add('chart-container2');
+    boton.textContent = 'Cambiar Escala';
+    boton.classList.add('toggleScale');
+    boton.style.margin = "5px";
     div.style.backgroundColor = 'white'
     div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
     // if (prevChart) footer.removeChild(prevChart);
     if (!prevChart) {
+        footer.appendChild(boton)
         footer.appendChild(div)
     } else {
         return
@@ -280,7 +286,9 @@ async function setup() {
     const data = getData();
     const borderWidth = 1;
     console.log(data);
-    const myChart = new Chart(ctx, {
+    let type = 'Todo';
+
+    let config = {
         type: 'line',
         data: {
             labels: data.days,
@@ -326,6 +334,10 @@ async function setup() {
                 ]
         },
         options: {
+            title: {
+                display: true,
+                text: 'Fondos Comunes de Inversión - ' + type
+            },
             // parsing: {
             //     xAxisKey: 'cuotapartes',
             //     yAxisKey: 'resultado'
@@ -347,12 +359,15 @@ async function setup() {
                     tension: 0
                 },
                 point: {
-                    hoverRadius: 6,
+                    intersect: false,
+                    mode: 'dataset',
+                    // hoverRadius: 6,
                     hitRadius: 1
                 }
             },
             legend: {
-                display: true
+                display: true,
+                position: 'bottom'
             },
             hover: {
                 mode: 'x',
@@ -367,7 +382,7 @@ async function setup() {
                 }],
                 xAxes: [{
                     ticks: {
-                        min: moment(await diaF(moment(new Date()))).subtract(60, 'days')
+                        // min: moment(await diaF(moment(new Date()))).subtract(40, 'days')
                     },
                     type: 'time',
                     time: {
@@ -376,21 +391,22 @@ async function setup() {
                 }]
             }
         }
+    };
+
+    const myChart = new Chart(ctx, config);
+
+    document.querySelector('.toggleScale').addEventListener('click', function () {
+        console.log('presionaste botón');
+        if (type === 'Todo') {
+            type = 'Filtrado'
+            myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(40, 'days');
+        } else {
+            type = 'Todo'
+            delete myChart.options.scales.xAxes[0].ticks.min;
+        };
+        myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
+
+        myChart.update();
     });
 
-    // const myChart2 = new Chart(ctx2, {
-    //     type: 'bar',
-    //     data: {
-    //         datasets: [{
-    //             data: [{ id: 'Sales', nested: { value: 1500 } }, { id: 'Purchases', nested: { value: 500 } }]
-    //         }]
-    //     },
-    //     options: {
-
-    //         parsing: {
-    //             xAxisKey: 'id',
-    //             yAxisKey: 'nested.value'
-    //         }
-    //     }
-    // });
 }
