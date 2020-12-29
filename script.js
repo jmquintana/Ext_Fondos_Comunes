@@ -227,13 +227,13 @@ async function isFeriado(fecha) {
     return filtrado.length
 }
 
-function getData() {
-    const data = localStorage.getItem('data')
+function getData(data = localStorage.getItem('data')) {
+    // const data = localStorage.getItem('data')
     const datos = JSON.parse(data).reverse()
     let array = {}
     const etiquetas = [...new Set(datos.map(item => item.fondo))]
-    const fechas = datos.reduce((acc, { fecha, fondo, resultado }) => {
-        (acc[fecha] || (acc[fecha] = [])).push({ fondo, resultado })
+    const fechas = datos.reduce((acc, { fecha, fondo, valor_cp }) => {
+        (acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp })
         return acc
     }, {})
 
@@ -245,7 +245,7 @@ function getData() {
         Object.keys(fechas).forEach(el => {
             let valor = fechas[el].filter(elem => elem.fondo === label)[0]
             if (valor) {
-                valor = valor.resultado
+                valor = valor.valor_cp
             } else {
                 valor = null
             }
@@ -302,7 +302,7 @@ function injectChart() {
 
 async function setup() {
     const ctx = document.getElementById('myChart').getContext('2d');
-    const data = getData();
+    const data = getData(localStorage.getItem('data'));
     const borderWidth = 1;
     console.log(data);
     let type = 'Todo';
@@ -316,7 +316,7 @@ async function setup() {
                 [
                     {
                         label: data.labels[0],
-                        data: data.values[0],
+                        data: delta(data.values[0]),
                         fill: false,
                         borderColor: 'rgba(255, 99, 132, 1)',
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -325,7 +325,7 @@ async function setup() {
                     },
                     {
                         label: data.labels[1],
-                        data: data.values[1],
+                        data: delta(data.values[1]),
                         fill: false,
                         borderColor: 'rgba(99, 200, 132, 1)',
                         backgroundColor: 'rgba(99, 200, 132, 0.5)',
@@ -334,7 +334,7 @@ async function setup() {
                     },
                     {
                         label: data.labels[2],
-                        data: data.values[2],
+                        data: delta(data.values[2]),
                         fill: false,
                         borderColor: 'rgba(54, 162, 235, 1)',
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
@@ -343,7 +343,7 @@ async function setup() {
                     },
                     {
                         label: data.labels[3],
-                        data: data.values[3],
+                        data: delta(data.values[3]),
                         fill: false,
                         borderColor: 'rgba(153, 102, 255, 1)',
                         backgroundColor: 'rgba(153, 102, 255, 0.5)',
@@ -368,7 +368,7 @@ async function setup() {
                 bodyFontSize: 14,
                 callbacks: {
                     title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY'),
-                    label: tooltipItem => tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2 })
+                    label: tooltipItem => `${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
                 },
                 bodyAlign: 'right',
                 position: 'average'
@@ -396,7 +396,7 @@ async function setup() {
                 yAxes: [{
                     ticks: {
                         // Include a dollar sign in the ticks
-                        callback: value => `$ ${value.toLocaleString('de-DE')}`
+                        callback: value => `${value.toLocaleString('de-DE')}%`
                     }
                 }],
                 xAxes: [{
@@ -416,32 +416,37 @@ async function setup() {
 
     document.querySelectorAll('.toggleScale').forEach(elm => {
         elm.addEventListener('click', function (e) {
+            e.stopPropagation();
             console.log(e.target);
+            let desde = getData().days[0];
             switch (e.target.id) {
                 case '7d':
-                    myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(7, 'days');
-                    type = 'Filtrado'
+                    desde = moment(new Date()).subtract(7, 'days');
+                    type = '7 días'
                     // code block
                     break;
                 case '30d':
-                    myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(30, 'days');
-                    type = 'Filtrado'
+                    desde = moment(new Date()).subtract(30, 'days');
+                    type = '30 días'
                     // code block
                     break;
                 case '90d':
-                    myChart.options.scales.xAxes[0].ticks.min = moment(new Date()).subtract(90, 'days');
-                    type = 'Filtrado'
+                    desde = moment(new Date()).subtract(90, 'days');
+                    type = '90 días'
                     // code block
                     break;
                 case 'reset':
-                    delete myChart.options.scales.xAxes[0].ticks.min;
+                    desde = getData().days[0];
                     type = 'Todo'
                     // code block
                     break;
                 default:
                 // code block
             }
-
+            let dat = getData(JSON.stringify(JSON.parse(localStorage.getItem('data')).filter(el => moment(el.fecha).isAfter(moment(desde)))));
+            myChart.data.labels = dat.days;
+            myChart.data.datasets.forEach((dataset, ind) => dataset.label = dat.labels[ind]);
+            myChart.data.datasets.forEach((dataset, ind) => dataset.data = delta(dat.values[ind]));
             console.log('presionaste botón');
             // if (type === 'Todo') {
             //     type = 'Filtrado'
@@ -450,7 +455,21 @@ async function setup() {
             // };
             myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
 
-            myChart.update();
+            myChart.update({
+                duration: 800,
+                easing: 'easeOutBounce'
+            });
         });
     });
+}
+
+function delta(arr) {
+    let res = [];
+    let acc = 0
+    arr.forEach((cur, ind, vec) => {
+        let vari = (cur - vec[ind - 1]) / vec[ind - 1] * 100 || 0
+        acc = (acc || (vari != Infinity)) ? acc + vari : acc
+        res.push(acc);
+    })
+    return res
 }
