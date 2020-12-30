@@ -166,7 +166,7 @@ function dia(date) {
 //funcion diaF contempla días feriados
 async function diaF(date) {
     //date debe ser de tipo moment
-    let fecha = date.format("YYYY-MM-DD");
+    // let fecha = date.format("YYYY-MM-DD");
     if (date.hour() < 8) {
         date.subtract(1, 'day');
     }
@@ -183,9 +183,9 @@ async function diaF(date) {
         return diaF(moment([date.year(), date.month(), date.date(), 8, 0, 0, 0]).add(1, 'day'));
 
     } else {
-        fecha = date.format("YYYY-MM-DD");
+        // fecha = date.format("YYYY-MM-DD");
         // console.log(fecha);
-        return moment([date.year(), date.month(), date.date(), 8, 0, 0, 0])
+        return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
     }
 }
 
@@ -198,13 +198,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
     btn.innerText = "Guardar";
 });
 
-function traer(year = 2020) {
-    fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
-        .then(data => data.json())
-        .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
-        .then(res => console.log(res))
-        .catch(err => console.error(err));
-}
+// function traer(year = 2020) {
+//     fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
+//         .then(data => data.json())
+//         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
+//         .then(res => console.log(res))
+//         .catch(err => console.error(err));
+// }
 
 function esFeriado(fecha) {
     let dia = moment(fecha);
@@ -227,36 +227,48 @@ async function isFeriado(fecha) {
     return filtrado.length
 }
 
-function getData(data = localStorage.getItem('data')) {
-    // const data = localStorage.getItem('data')
-    const datos = JSON.parse(data).reverse()
+function getData(desde) {
+    const data = localStorage.getItem('data');
+    const datos = desde ? JSON.parse(data).reverse().filter(el => moment(el.fecha).isAfter(moment(desde))) : JSON.parse(data).reverse();
     let array = {}
     const etiquetas = [...new Set(datos.map(item => item.fondo))]
-    const fechas = datos.reduce((acc, { fecha, fondo, valor_cp }) => {
-        (acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp })
+    const fechas = datos.reduce((acc, { fecha, fondo, valor_cp, tenencia }) => {
+        (acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp, tenencia })
         return acc
     }, {})
-
+    console.log(fechas);
     array.days = Object.keys(fechas)
-    array.labels = (etiquetas)
+    array.labels = etiquetas.sort()
     array.values = []
-    etiquetas.forEach((label) => {
+    array.holdings = []
+    etiquetas.forEach((fondo) => {
         let valores = []
-        Object.keys(fechas).forEach(el => {
-            let valor = fechas[el].filter(elem => elem.fondo === label)[0]
-            if (valor) {
-                valor = valor.valor_cp
+        let tenencias = []
+        Object.keys(fechas).forEach(fecha => {
+            let valorDia = fechas[fecha].filter(elem => elem.fondo === fondo)[0]
+            // valor = valor ? valor.valor_cp : null
+            // tenencia = valor ? valor.tenencia : null
+
+            let valor, tenencia
+            if (valorDia) {
+                valor = valorDia.valor_cp
+                tenencia = valorDia.tenencia
             } else {
-                valor = null
+                valor = null;
+                tenencia = null
             }
+
+
             valores.push(valor)
+            tenencias.push(tenencia)
         })
         array.values.push(valores)
+        array.holdings.push(tenencias)
     })
     console.log({ array });
 
-    const { days, labels, values } = array
-    return { days, labels, values };
+    const { days, labels, values, holdings } = array
+    return { days, labels, values, holdings };
 }
 
 function injectChart() {
@@ -268,6 +280,7 @@ function injectChart() {
     const boton2 = document.createElement("button");
     const boton3 = document.createElement("button");
     const boton4 = document.createElement("button");
+    const boton5 = document.createElement("button");
     div.classList.add('chart-container2');
     boton1.textContent = '7d';
     boton1.classList.add('toggleScale');
@@ -285,6 +298,10 @@ function injectChart() {
     boton4.classList.add('toggleScale');
     boton4.id = 'reset';
     boton4.style.margin = "5px";
+    boton5.textContent = 'Borrar';
+    boton5.classList.add('toggleScale');
+    boton5.id = 'borrar';
+    boton5.style.margin = "5px";
     // div.style.backgroundColor = 'white'
     div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
     // if (prevChart) footer.removeChild(prevChart);
@@ -293,6 +310,7 @@ function injectChart() {
         footer.appendChild(boton2)
         footer.appendChild(boton3)
         footer.appendChild(boton4)
+        footer.appendChild(boton5)
         footer.appendChild(div)
     } else {
         return
@@ -302,54 +320,109 @@ function injectChart() {
 
 async function setup() {
     const ctx = document.getElementById('myChart').getContext('2d');
-    const data = getData(localStorage.getItem('data'));
+    const data = getData();
     const borderWidth = 1;
     console.log(data);
     let type = 'Todo';
 
     let config = {
-        type: 'line',
         data: {
             labels: data.days,
-            // labels: data.days1,
             datasets:
                 [
                     {
+                        type: 'line',
                         label: data.labels[0],
                         data: delta(data.values[0]),
                         fill: false,
                         borderColor: 'rgba(255, 99, 132, 1)',
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
                         borderWidth: borderWidth,
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: 'y'
                     },
                     {
+                        type: 'line',
                         label: data.labels[1],
                         data: delta(data.values[1]),
                         fill: false,
                         borderColor: 'rgba(99, 200, 132, 1)',
                         backgroundColor: 'rgba(99, 200, 132, 0.5)',
                         borderWidth: borderWidth,
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: 'y'
                     },
                     {
+                        type: 'line',
                         label: data.labels[2],
                         data: delta(data.values[2]),
                         fill: false,
                         borderColor: 'rgba(54, 162, 235, 1)',
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderWidth: borderWidth,
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: 'y'
                     },
                     {
+                        type: 'line',
                         label: data.labels[3],
                         data: delta(data.values[3]),
                         fill: false,
                         borderColor: 'rgba(153, 102, 255, 1)',
                         backgroundColor: 'rgba(153, 102, 255, 0.5)',
                         borderWidth: borderWidth,
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'bar',
+                        label: data.labels[0],
+                        data: data.holdings[0],
+                        fill: false,
+                        borderWidth: 0,
+                        // borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: borderWidth,
+                        spanGaps: true,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'bar',
+                        label: data.labels[1],
+                        data: data.holdings[1],
+                        fill: false,
+                        borderWidth: 0,
+                        // borderColor: 'rgba(99, 200, 132, 1)',
+                        backgroundColor: 'rgba(99, 200, 132, 0.2)',
+                        borderWidth: borderWidth,
+                        spanGaps: true,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'bar',
+                        label: data.labels[2],
+                        data: data.holdings[2],
+                        fill: false,
+                        borderWidth: 0,
+                        // borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: borderWidth,
+                        spanGaps: true,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'bar',
+                        label: data.labels[3],
+                        data: data.holdings[3],
+                        fill: false,
+                        borderWidth: 0,
+                        // borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderWidth: borderWidth,
+                        spanGaps: true,
+                        yAxisID: 'y1'
                     }
+
                 ]
         },
         options: {
@@ -394,14 +467,29 @@ async function setup() {
             },
             scales: {
                 yAxes: [{
+                    id: 'y',
+                    position: 'left',
                     ticks: {
                         // Include a dollar sign in the ticks
                         callback: value => `${value.toLocaleString('de-DE')}%`
                     }
+                },
+                {
+                    id: 'y1',
+                    position: 'right',
+                    stacked: true,
+                    offset: false,
+                    gridLines: {
+                        offsetGridLines: false
+                    },
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: value => `$ ${value.toLocaleString('de-DE')}`
+                    }
                 }],
                 xAxes: [{
+                    stacked: true,
                     ticks: {
-                        // min: moment(await diaF(moment(new Date()))).subtract(40, 'days')
                     },
                     type: 'time',
                     time: {
@@ -417,44 +505,42 @@ async function setup() {
     document.querySelectorAll('.toggleScale').forEach(elm => {
         elm.addEventListener('click', function (e) {
             e.stopPropagation();
-            console.log(e.target);
-            let desde = getData().days[0];
+            let desde;
             switch (e.target.id) {
                 case '7d':
                     desde = moment(new Date()).subtract(7, 'days');
+                    myChart.options.scales.xAxes[0].time.unit = 'day'
                     type = '7 días'
-                    // code block
                     break;
                 case '30d':
                     desde = moment(new Date()).subtract(30, 'days');
+                    myChart.options.scales.xAxes[0].time.unit = 'day'
                     type = '30 días'
-                    // code block
                     break;
                 case '90d':
                     desde = moment(new Date()).subtract(90, 'days');
+                    myChart.options.scales.xAxes[0].time.unit = 'month'
                     type = '90 días'
-                    // code block
                     break;
                 case 'reset':
-                    desde = getData().days[0];
                     type = 'Todo'
-                    // code block
+                    myChart.options.scales.xAxes[0].time.unit = 'month'
+                    break;
+                case 'borrar':
+                    type = 'Borrado'
+                    myChart.options.scales.xAxes[0].time.unit = 'day'
+                    myChart.data.labels.shift();
+                    myChart.data.datasets.forEach(dataset => dataset.data.shift());
+                    return myChart.update()
                     break;
                 default:
-                // code block
             }
-            let dat = getData(JSON.stringify(JSON.parse(localStorage.getItem('data')).filter(el => moment(el.fecha).isAfter(moment(desde)))));
+            let dat = getData(desde);
             myChart.data.labels = dat.days;
-            myChart.data.datasets.forEach((dataset, ind) => dataset.label = dat.labels[ind]);
-            myChart.data.datasets.forEach((dataset, ind) => dataset.data = delta(dat.values[ind]));
-            console.log('presionaste botón');
-            // if (type === 'Todo') {
-            //     type = 'Filtrado'
-            // } else {
-            //     type = 'Todo'
-            // };
+            // myChart.data.datasets.forEach((dataset, ind) => dataset.label = dat.labels[ind]);
+            myChart.data.datasets.filter(dataset => dataset.type === 'line').forEach((dataset, ind) => dataset.data = delta(dat.values[ind]));
+            myChart.data.datasets.filter(dataset => dataset.type === 'bar').forEach((dataset, ind) => dataset.data = dat.holdings[ind]);
             myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
-
             myChart.update({
                 duration: 800,
                 easing: 'easeOutBounce'
