@@ -46,6 +46,10 @@ async function acciones(e) {
         console.log(dia.format("DD-MM-YYYY"));
         cargado = false;
     }
+    window.scroll({
+        top: 1000,
+        behavior: 'smooth'
+    });
 }
 
 async function mostrarRendimientoFondo() {
@@ -282,17 +286,17 @@ function injectChart() {
     const boton4 = document.createElement("button");
     const boton5 = document.createElement("button");
     div.classList.add('chart-container2');
-    boton1.textContent = '7d';
+    boton1.textContent = '10d';
     boton1.classList.add('toggleScale');
-    boton1.id = '7d';
+    boton1.id = '10d';
     boton1.style.margin = "5px";
     boton2.textContent = '30d';
     boton2.classList.add('toggleScale');
     boton2.id = '30d';
     boton2.style.margin = "5px";
-    boton3.textContent = '90d';
+    boton3.textContent = '60d';
     boton3.classList.add('toggleScale');
-    boton3.id = '90d';
+    boton3.id = '60d';
     boton3.style.margin = "5px";
     boton4.textContent = 'Reset';
     boton4.classList.add('toggleScale');
@@ -322,6 +326,7 @@ async function setup() {
     const ctx = document.getElementById('myChart').getContext('2d');
     const data = getData();
     const borderWidth = 1;
+    const showLine = true;
     console.log(data);
     let type = 'Todo';
 
@@ -379,53 +384,61 @@ async function setup() {
                         yAxisID: 'y'
                     },
                     {
-                        type: 'bar',
+                        type: 'line',
+                        pointRadius: 0,
+                        showLine: showLine,
                         order: 2,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[0],
                         data: data.holdings[0],
                         borderWidth: false,
-                        // borderColor: 'rgba(255, 99, 132, 1)',
+                        borderColor: 'rgba(255, 99, 132, 0)',
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         spanGaps: true,
                         yAxisID: 'y1'
                     },
                     {
-                        type: 'bar',
+                        type: 'line',
+                        pointRadius: 0,
+                        showLine: showLine,
                         order: 0,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[1],
                         data: data.holdings[1],
                         borderWidth: false,
-                        // borderColor: 'rgba(99, 200, 132, 1)',
+                        borderColor: 'rgba(99, 200, 132, 0)',
                         backgroundColor: 'rgba(99, 200, 132, 0.2)',
                         spanGaps: true,
                         yAxisID: 'y1'
                     },
                     {
-                        type: 'bar',
+                        type: 'line',
+                        pointRadius: 0,
+                        showLine: showLine,
                         order: 1,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[2],
                         data: data.holdings[2],
                         borderWidth: false,
-                        // borderColor: 'rgba(54, 162, 235, 1)',
+                        borderColor: 'rgba(54, 162, 235, 0)',
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         spanGaps: true,
                         yAxisID: 'y1'
                     },
                     {
-                        type: 'bar',
+                        type: 'line',
+                        pointRadius: 0,
+                        showLine: showLine,
                         order: 3,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[3],
                         data: data.holdings[3],
                         borderWidth: false,
-                        // borderColor: 'rgba(153, 102, 255, 1)',
+                        borderColor: 'rgba(153, 102, 255, 0)',
                         backgroundColor: 'rgba(153, 102, 255, 0.2)',
                         spanGaps: true,
                         yAxisID: 'y1'
@@ -459,6 +472,7 @@ async function setup() {
                     tension: 0
                 },
                 point: {
+                    // radius:0,
                     intersect: false,
                     mode: 'dataset',
                     // hoverRadius: 6,
@@ -467,7 +481,8 @@ async function setup() {
             },
             legend: {
                 display: true,
-                position: 'bottom'
+                position: 'bottom',
+                itemWidth: 350
             },
             hover: {
                 mode: 'x',
@@ -486,11 +501,12 @@ async function setup() {
                     id: 'y1',
                     position: 'right',
                     stacked: true,
-                    offset: false,
+                    // offset: false,
                     gridLines: {
                         offsetGridLines: false
                     },
                     ticks: {
+                        beginAtZero: true,
                         // Include a dollar sign in the ticks
                         callback: value => `$ ${value.toLocaleString('de-DE')}`
                     }
@@ -516,20 +532,20 @@ async function setup() {
             e.stopPropagation();
             let desde;
             switch (e.target.id) {
-                case '7d':
-                    desde = moment(new Date()).subtract(7, 'days');
+                case '10d':
+                    desde = moment(new Date()).subtract(10, 'days');
                     myChart.options.scales.xAxes[0].time.unit = 'day'
-                    type = '7 días'
+                    type = '10 días'
                     break;
                 case '30d':
                     desde = moment(new Date()).subtract(30, 'days');
                     myChart.options.scales.xAxes[0].time.unit = 'day'
                     type = '30 días'
                     break;
-                case '90d':
-                    desde = moment(new Date()).subtract(90, 'days');
+                case '60d':
+                    desde = moment(new Date()).subtract(60, 'days');
                     myChart.options.scales.xAxes[0].time.unit = 'month'
-                    type = '90 días'
+                    type = '60 días'
                     break;
                 case 'reset':
                     type = 'Todo'
@@ -540,6 +556,7 @@ async function setup() {
                     myChart.options.scales.xAxes[0].time.unit = 'day'
                     myChart.data.labels.shift();
                     myChart.data.datasets.forEach(dataset => dataset.data.shift());
+                    // myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach(dataset => dataset.data = delta(dataset.data));
                     return myChart.update()
                     break;
                 default:
@@ -547,8 +564,8 @@ async function setup() {
             let dat = getData(desde);
             myChart.data.labels = dat.days;
             // myChart.data.datasets.forEach((dataset, ind) => dataset.label = dat.labels[ind]);
-            myChart.data.datasets.filter(dataset => dataset.type === 'line').forEach((dataset, ind) => dataset.data = delta(dat.values[ind]));
-            myChart.data.datasets.filter(dataset => dataset.type === 'bar').forEach((dataset, ind) => dataset.data = dat.holdings[ind]);
+            myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, ind) => dataset.data = delta(dat.values[ind]));
+            myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, ind) => dataset.data = dat.holdings[ind]);
             myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
             myChart.update({
                 duration: 800,
