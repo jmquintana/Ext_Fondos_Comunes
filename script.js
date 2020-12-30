@@ -332,6 +332,7 @@ async function setup() {
                 [
                     {
                         type: 'line',
+                        order: 2,
                         label: data.labels[0],
                         data: delta(data.values[0]),
                         fill: false,
@@ -343,6 +344,7 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        order: 0,
                         label: data.labels[1],
                         data: delta(data.values[1]),
                         fill: false,
@@ -354,6 +356,7 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        order: 1,
                         label: data.labels[2],
                         data: delta(data.values[2]),
                         fill: false,
@@ -365,6 +368,7 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        order: 3,
                         label: data.labels[3],
                         data: delta(data.values[3]),
                         fill: false,
@@ -376,49 +380,53 @@ async function setup() {
                     },
                     {
                         type: 'bar',
+                        order: 2,
+                        barPercentage: 1,
+                        categoryPercentage: .9,
                         label: data.labels[0],
                         data: data.holdings[0],
-                        fill: false,
-                        borderWidth: 0,
+                        borderWidth: false,
                         // borderColor: 'rgba(255, 99, 132, 1)',
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderWidth: borderWidth,
                         spanGaps: true,
                         yAxisID: 'y1'
                     },
                     {
                         type: 'bar',
+                        order: 0,
+                        barPercentage: 1,
+                        categoryPercentage: .9,
                         label: data.labels[1],
                         data: data.holdings[1],
-                        fill: false,
-                        borderWidth: 0,
+                        borderWidth: false,
                         // borderColor: 'rgba(99, 200, 132, 1)',
                         backgroundColor: 'rgba(99, 200, 132, 0.2)',
-                        borderWidth: borderWidth,
                         spanGaps: true,
                         yAxisID: 'y1'
                     },
                     {
                         type: 'bar',
+                        order: 1,
+                        barPercentage: 1,
+                        categoryPercentage: .9,
                         label: data.labels[2],
                         data: data.holdings[2],
-                        fill: false,
-                        borderWidth: 0,
+                        borderWidth: false,
                         // borderColor: 'rgba(54, 162, 235, 1)',
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderWidth: borderWidth,
                         spanGaps: true,
                         yAxisID: 'y1'
                     },
                     {
                         type: 'bar',
+                        order: 3,
+                        barPercentage: 1,
+                        categoryPercentage: .9,
                         label: data.labels[3],
                         data: data.holdings[3],
-                        fill: false,
-                        borderWidth: 0,
+                        borderWidth: false,
                         // borderColor: 'rgba(153, 102, 255, 1)',
                         backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                        borderWidth: borderWidth,
                         spanGaps: true,
                         yAxisID: 'y1'
                     }
@@ -488,6 +496,7 @@ async function setup() {
                     }
                 }],
                 xAxes: [{
+                    offsetGridLines: false,
                     stacked: true,
                     ticks: {
                     },
@@ -543,7 +552,7 @@ async function setup() {
             myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
             myChart.update({
                 duration: 800,
-                easing: 'easeOutBounce'
+                // easing: 'easeOutBounce'
             });
         });
     });
