@@ -396,7 +396,7 @@ async function setup() {
                         borderColor: 'rgba(255, 99, 132, 0)',
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         spanGaps: true,
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
                     },
                     {
                         type: 'line',
@@ -411,7 +411,7 @@ async function setup() {
                         borderColor: 'rgba(99, 200, 132, 0)',
                         backgroundColor: 'rgba(99, 200, 132, 0.2)',
                         spanGaps: true,
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
                     },
                     {
                         type: 'line',
@@ -426,7 +426,7 @@ async function setup() {
                         borderColor: 'rgba(54, 162, 235, 0)',
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         spanGaps: true,
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
                     },
                     {
                         type: 'line',
@@ -441,7 +441,7 @@ async function setup() {
                         borderColor: 'rgba(153, 102, 255, 0)',
                         backgroundColor: 'rgba(153, 102, 255, 0.2)',
                         spanGaps: true,
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
                     }
 
                 ]
@@ -456,14 +456,30 @@ async function setup() {
             //     yAxisKey: 'resultado'
             // },
             tooltips: {
-                mode: 'x',
+                mode: 'x-axis',
                 intersect: false,
                 titleFontSize: 18,
+                titleAlign: 'center',
                 bodyFontSize: 14,
                 callbacks: {
                     title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY'),
-                    label: tooltipItem => `${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                    label: (tooltipItem, data) => {
+                        var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += `${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+                        return label;
+                    }
                 },
+                filter: function (tooltipItem) {
+                    return tooltipItem.datasetIndex < 4;
+                },
+                // callbacks: {
+                //     title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY'),
+                //     label: tooltipItem => `${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                // },
                 bodyAlign: 'right',
                 position: 'average'
             },
@@ -472,11 +488,11 @@ async function setup() {
                     tension: 0
                 },
                 point: {
-                    // radius:0,
+                    // radius: 8,
                     intersect: false,
-                    mode: 'dataset',
-                    // hoverRadius: 6,
-                    hitRadius: 1
+                    mode: 'x-axis',
+                    hoverRadius: 5,
+                    hitRadius: 0
                 }
             },
             legend: {
@@ -485,8 +501,8 @@ async function setup() {
                 itemWidth: 350
             },
             hover: {
-                mode: 'x',
-                intersect: false
+                mode: 'x-axis',
+                intersect: true
             },
             scales: {
                 yAxes: [{
