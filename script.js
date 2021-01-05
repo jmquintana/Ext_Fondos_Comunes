@@ -44,12 +44,14 @@ async function acciones(e) {
         injectChart();
         const dia = await diaF(moment(new Date));
         console.log(dia.format("DD-MM-YYYY"));
+        cargado = true;
+        window.scroll({
+            top: 1000,
+            behavior: 'smooth'
+        });
+    } else if (e.which == 1 && !window.location.href.includes('fondos-de-inversion')) {
         cargado = false;
     }
-    window.scroll({
-        top: 1000,
-        behavior: 'smooth'
-    });
 }
 
 async function mostrarRendimientoFondo() {
@@ -231,16 +233,17 @@ async function isFeriado(fecha) {
     return filtrado.length
 }
 
-function getData(desde) {
-    const data = localStorage.getItem('data');
-    const datos = desde ? JSON.parse(data).reverse().filter(el => moment(el.fecha).isAfter(moment(desde))) : JSON.parse(data).reverse();
+function getData(desde, hasta, data) {
+    data = data || localStorage.getItem('data');
+    hasta = hasta || JSON.parse(data)[0].fecha;
+    const datos = desde ? JSON.parse(data).reverse().filter(el => moment(el.fecha).isBetween(moment(desde), moment(hasta), undefined, '[]')) : JSON.parse(data).reverse();
     let array = {}
     const etiquetas = [...new Set(datos.map(item => item.fondo))]
     const fechas = datos.reduce((acc, { fecha, fondo, valor_cp, tenencia }) => {
         (acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp, tenencia })
         return acc
     }, {})
-    console.log(fechas);
+    // console.log(fechas);
     array.days = Object.keys(fechas)
     array.labels = etiquetas.sort()
     array.values = []
@@ -269,7 +272,7 @@ function getData(desde) {
         array.values.push(valores)
         array.holdings.push(tenencias)
     })
-    console.log({ array });
+    // console.log({ array });
 
     const { days, labels, values, holdings } = array
     return { days, labels, values, holdings };
@@ -329,7 +332,7 @@ async function setup() {
     const showLine = true;
     console.log(data);
     let type = 'Todo';
-
+    const alfa = 0.2;
     let config = {
         data: {
             labels: data.days,
@@ -385,7 +388,7 @@ async function setup() {
                     },
                     {
                         type: 'line',
-                        pointRadius: 0,
+                        pointRadius: false,
                         showLine: showLine,
                         order: 2,
                         barPercentage: 1,
@@ -394,13 +397,13 @@ async function setup() {
                         data: data.holdings[0],
                         borderWidth: false,
                         borderColor: 'rgba(255, 99, 132, 0)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        backgroundColor: `rgba(255, 99, 132, ${alfa})`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     },
                     {
                         type: 'line',
-                        pointRadius: 0,
+                        pointRadius: false,
                         showLine: showLine,
                         order: 0,
                         barPercentage: 1,
@@ -409,13 +412,13 @@ async function setup() {
                         data: data.holdings[1],
                         borderWidth: false,
                         borderColor: 'rgba(99, 200, 132, 0)',
-                        backgroundColor: 'rgba(99, 200, 132, 0.2)',
+                        backgroundColor: `rgba(99, 200, 132, ${alfa})`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     },
                     {
                         type: 'line',
-                        pointRadius: 0,
+                        pointRadius: false,
                         showLine: showLine,
                         order: 1,
                         barPercentage: 1,
@@ -424,13 +427,13 @@ async function setup() {
                         data: data.holdings[2],
                         borderWidth: false,
                         borderColor: 'rgba(54, 162, 235, 0)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        backgroundColor: `rgba(54, 162, 235, ${alfa})`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     },
                     {
                         type: 'line',
-                        pointRadius: 0,
+                        pointRadius: false,
                         showLine: showLine,
                         order: 3,
                         barPercentage: 1,
@@ -439,7 +442,7 @@ async function setup() {
                         data: data.holdings[3],
                         borderWidth: false,
                         borderColor: 'rgba(153, 102, 255, 0)',
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        backgroundColor: `rgba(153, 102, 255, ${alfa})`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     }
@@ -458,11 +461,20 @@ async function setup() {
             tooltips: {
                 mode: 'x-axis',
                 intersect: false,
-                titleFontSize: 18,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                titleFontFamily: 'Open Sans',
+                titleFontSize: 14,
+                titleFontColor: 'rgba(0, 0, 0, 0.7)',
+                titleFontStyle: 'bold',
                 titleAlign: 'center',
-                bodyFontSize: 14,
+                bodyFontFamily: 'Open Sans',
+                // bodyFontSize: 14,
+                bodyFontColor: 'rgba(0, 0, 0, 0.7)',
+                borderColor: 'rgba(122, 122, 122, 0.2)',
+                bodySpacing: 3,
+                borderWidth: 1,
                 callbacks: {
-                    title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY'),
+                    title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY').replace('.', ''),
                     label: (tooltipItem, data) => {
                         var label = data.datasets[tooltipItem.datasetIndex].label || '';
 
@@ -492,7 +504,8 @@ async function setup() {
                     intersect: false,
                     mode: 'x-axis',
                     hoverRadius: 5,
-                    hitRadius: 0
+                    hitRadius: 0,
+                    borderWidth: 1,
                 }
             },
             legend: {
@@ -519,6 +532,11 @@ async function setup() {
                     stacked: true,
                     // offset: false,
                     gridLines: {
+                        display: true,
+                        drawOnChartArea: true,
+                        drawTicks: true,
+                        borderDash: [5, 5],
+                        borderDashOffset: 0.1,
                         offsetGridLines: false
                     },
                     ticks: {
@@ -528,13 +546,30 @@ async function setup() {
                     }
                 }],
                 xAxes: [{
+                    gridLines: {
+                        display: true,
+                        offsetGridLines: false
+                    },
                     offsetGridLines: false,
                     stacked: true,
                     ticks: {
+                        callback: label => {
+                            // console.log(label.replace('.', ''));
+                            return label.replace('.', '');
+                        },
+                        minor: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        },
                     },
                     type: 'time',
                     time: {
-                        unit: 'month'
+                        displayFormats: {
+                            month: 'MMM YYYY'
+                        },
+                        unit: 'day'
                     }
                 }]
             }
@@ -545,44 +580,57 @@ async function setup() {
 
     document.querySelectorAll('.toggleScale').forEach(elm => {
         elm.addEventListener('click', function (e) {
+            e.preventDefault();
             e.stopPropagation();
             let desde;
+            let opcion;
             switch (e.target.id) {
                 case '10d':
-                    desde = moment(new Date()).subtract(10, 'days');
                     myChart.options.scales.xAxes[0].time.unit = 'day'
+                    opcion = 9;
                     type = '10 días'
                     break;
                 case '30d':
-                    desde = moment(new Date()).subtract(30, 'days');
                     myChart.options.scales.xAxes[0].time.unit = 'day'
+                    opcion = 29;
                     type = '30 días'
                     break;
                 case '60d':
-                    desde = moment(new Date()).subtract(60, 'days');
-                    myChart.options.scales.xAxes[0].time.unit = 'month'
+                    myChart.options.scales.xAxes[0].time.unit = 'day'
+                    opcion = 59;
                     type = '60 días'
                     break;
                 case 'reset':
                     type = 'Todo'
-                    myChart.options.scales.xAxes[0].time.unit = 'month'
+                    myChart.options.scales.xAxes[0].time.unit = 'day'
+                    let data = getData();
+                    opcion = moment(data.days[data.days.length - 1]).diff(moment(data.days[0]), 'days');
                     break;
                 case 'borrar':
                     type = 'Borrado'
                     myChart.options.scales.xAxes[0].time.unit = 'day'
-                    myChart.data.labels.shift();
-                    myChart.data.datasets.forEach(dataset => dataset.data.shift());
-                    // myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach(dataset => dataset.data = delta(dataset.data));
-                    return myChart.update()
+                    // deleteDays(2, myChart);
+                    // myChart.data.labels.splice(0, 2);
+                    // myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
+                    //     dataset.data.splice(0, 2);
+                    //     dataset.data = dataset.data.map((point) => {
+                    //         return point - dataset.data[0];
+                    //     });
+                    // });
+                    // myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset) => dataset.data.splice(0, 2));
+                    myChart.update()
                     break;
                 default:
             }
-            let dat = getData(desde);
-            myChart.data.labels = dat.days;
-            // myChart.data.datasets.forEach((dataset, ind) => dataset.label = dat.labels[ind]);
-            myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, ind) => dataset.data = delta(dat.values[ind]));
-            myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, ind) => dataset.data = dat.holdings[ind]);
-            myChart.options.title.text = 'Fondos Comunes de Inversión - ' + type;
+            console.log(myChart.data.labels[myChart.data.labels.length - 1]);
+            const dif = moment(myChart.data.labels[0]).diff(moment(new Date()).subtract(opcion, 'days'), 'days');
+            if (dif < 0) {
+                let days = myChart.data.labels.filter(dia => moment(dia).isSameOrBefore(moment(myChart.data.labels[myChart.data.labels.length - 1]).subtract(opcion, 'days'))).length;
+                deleteDays(days, myChart);
+            } else if (dif > 0) {
+                let from = moment(myChart.data.labels[myChart.data.labels.length - 1]).subtract(opcion, 'days');
+                addDays(from, myChart);
+            };
             myChart.update({
                 duration: 800,
                 // easing: 'easeOutBounce'
@@ -601,3 +649,42 @@ function delta(arr) {
     })
     return res
 }
+
+function deleteDays(days, chart) {
+    chart.data.labels.splice(0, days);
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
+        dataset.data.splice(0, days);
+        dataset.data = dataset.data.map((point) => {
+            return point - dataset.data[0];
+        });
+    });
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset) => dataset.data.splice(0, days));
+};
+
+function addDays(from, chart) {
+    let to = moment(chart.data.labels[0]).subtract(1, 'days')._d;
+    const data = getData(from, to);
+    const dataPos = getData(to);
+    console.log(chart.data.labels)
+    data.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, i) => {
+        data.holdings[i].reverse().forEach(valor => dataset.data.unshift(valor));
+        // console.log(dataset.data);
+    });
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
+        let cont = 0;
+        data.values[i].reverse().forEach(valor => {
+            dataset.data.unshift(valor);
+            console.log(cont);
+            cont++
+        });
+        console.log(dataset.data);
+        let k = 0;
+        for (var j = data.days.length, len = dataset.data.length; j < len; j++) {
+            console.log(j);
+            dataset.data[j] = dataPos.values[i][k];
+            k++
+        }
+        dataset.data = delta(dataset.data);
+    });
+};
