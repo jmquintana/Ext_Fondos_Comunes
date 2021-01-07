@@ -618,16 +618,9 @@ async function setup() {
                 case 'borrar':
                     type = 'Borrado'
                     myChart.options.scales.xAxes[0].time.unit = 'day'
-                    // deleteDays(2, myChart);
-                    // myChart.data.labels.splice(0, 2);
-                    // myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
-                    //     dataset.data.splice(0, 2);
-                    //     dataset.data = dataset.data.map((point) => {
-                    //         return point - dataset.data[0];
-                    //     });
-                    // });
-                    // myChart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset) => dataset.data.splice(0, 2));
+                    deleteDays(1, myChart);
                     myChart.update()
+                    return
                     break;
                 default:
             }
@@ -642,7 +635,7 @@ async function setup() {
             };
             myChart.update({
                 duration: 800,
-                // easing: 'easeOutBounce'
+                easing: 'easeOutBounce'
             });
         });
     });
@@ -678,8 +671,10 @@ function addDays(from, chart) {
     data.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, i) => {
         data.holdings[i].reverse().forEach(valor => dataset.data.unshift(valor));
-        // console.log(dataset.data);
     });
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach(dataset => {
+        dataset.data = toNumber(dataset.data);
+    })
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
         let cont = 0;
         data.values[i].reverse().forEach(valor => {
