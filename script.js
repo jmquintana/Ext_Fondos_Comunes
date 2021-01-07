@@ -340,7 +340,7 @@ async function setup() {
                 [
                     {
                         type: 'line',
-                        order: 2,
+                        order: 0,
                         label: data.labels[0],
                         data: delta(data.values[0]),
                         fill: false,
@@ -352,7 +352,7 @@ async function setup() {
                     },
                     {
                         type: 'line',
-                        order: 0,
+                        order: 1,
                         label: data.labels[1],
                         data: delta(data.values[1]),
                         fill: false,
@@ -364,7 +364,7 @@ async function setup() {
                     },
                     {
                         type: 'line',
-                        order: 1,
+                        order: 2,
                         label: data.labels[2],
                         data: delta(data.values[2]),
                         fill: false,
@@ -388,13 +388,14 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        // fill: '-1',
                         pointRadius: false,
                         showLine: showLine,
-                        order: 2,
+                        order: 4,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[0],
-                        data: data.holdings[0],
+                        data: toNumber(data.holdings[0]),
                         borderWidth: false,
                         borderColor: 'rgba(255, 99, 132, 0)',
                         backgroundColor: `rgba(255, 99, 132, ${alfa})`,
@@ -403,13 +404,14 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        fill: '-1',
                         pointRadius: false,
                         showLine: showLine,
-                        order: 0,
+                        order: 5,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[1],
-                        data: data.holdings[1],
+                        data: toNumber(data.holdings[1]),
                         borderWidth: false,
                         borderColor: 'rgba(99, 200, 132, 0)',
                         backgroundColor: `rgba(99, 200, 132, ${alfa})`,
@@ -418,13 +420,14 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        fill: '-1',
                         pointRadius: false,
                         showLine: showLine,
-                        order: 1,
+                        order: 6,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[2],
-                        data: data.holdings[2],
+                        data: toNumber(data.holdings[2]),
                         borderWidth: false,
                         borderColor: 'rgba(54, 162, 235, 0)',
                         backgroundColor: `rgba(54, 162, 235, ${alfa})`,
@@ -433,13 +436,14 @@ async function setup() {
                     },
                     {
                         type: 'line',
+                        fill: '-1',
                         pointRadius: false,
                         showLine: showLine,
-                        order: 3,
+                        order: 7,
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[3],
-                        data: data.holdings[3],
+                        data: toNumber(data.holdings[3]),
                         borderWidth: false,
                         borderColor: 'rgba(153, 102, 255, 0)',
                         backgroundColor: `rgba(153, 102, 255, ${alfa})`,
@@ -450,6 +454,11 @@ async function setup() {
                 ]
         },
         options: {
+            plugins: {
+                filler: {
+                    propagate: true
+                }
+            },
             title: {
                 display: true,
                 text: 'Fondos Comunes de Inversión - ' + type
@@ -540,6 +549,7 @@ async function setup() {
                         offsetGridLines: false
                     },
                     ticks: {
+                        // max: 800000,
                         beginAtZero: true,
                         // Include a dollar sign in the ticks
                         callback: value => `$ ${value.toLocaleString('de-DE')}`
@@ -582,7 +592,6 @@ async function setup() {
         elm.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            let desde;
             let opcion;
             switch (e.target.id) {
                 case '10d':
@@ -602,7 +611,7 @@ async function setup() {
                     break;
                 case 'reset':
                     type = 'Todo'
-                    myChart.options.scales.xAxes[0].time.unit = 'day'
+                    myChart.options.scales.xAxes[0].time.unit = 'month'
                     let data = getData();
                     opcion = moment(data.days[data.days.length - 1]).diff(moment(data.days[0]), 'days');
                     break;
@@ -688,3 +697,8 @@ function addDays(from, chart) {
         dataset.data = delta(dataset.data);
     });
 };
+
+function toNumber(value) {
+    let res = value.map(val => val ? val : 0)
+    return res
+}
