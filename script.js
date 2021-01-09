@@ -1,5 +1,4 @@
 console.log('funciona script.js')
-// guardarTabla();
 document.addEventListener("mouseup", acciones, false);
 
 function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado) {
@@ -189,7 +188,6 @@ async function diaF(date) {
         return diaF(moment([date.year(), date.month(), date.date(), 8, 0, 0, 0]).add(1, 'day'));
 
     } else {
-        // fecha = date.format("YYYY-MM-DD");
         // console.log(fecha);
         return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
     }
@@ -204,14 +202,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     btn.innerText = "Guardar";
 });
 
-// function traer(year = 2020) {
-//     fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
-//         .then(data => data.json())
-//         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
-//         .then(res => console.log(res))
-//         .catch(err => console.error(err));
-// }
-
 function esFeriado(fecha) {
     let dia = moment(fecha);
     let year = fecha.getFullYear();
@@ -219,7 +209,6 @@ function esFeriado(fecha) {
         .then(data => data.json())
         .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
         .then(res => (res.filter(el => el.isSame(dia)).length))
-        // .then(res => console.log(res))
         .catch(err => console.error(err));
 }
 
@@ -243,7 +232,6 @@ function getData(desde, hasta, data) {
         (acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp, tenencia })
         return acc
     }, {})
-    // console.log(fechas);
     array.days = Object.keys(fechas)
     array.labels = etiquetas.sort()
     array.values = []
@@ -253,9 +241,6 @@ function getData(desde, hasta, data) {
         let tenencias = []
         Object.keys(fechas).forEach(fecha => {
             let valorDia = fechas[fecha].filter(elem => elem.fondo === fondo)[0]
-            // valor = valor ? valor.valor_cp : null
-            // tenencia = valor ? valor.tenencia : null
-
             let valor, tenencia
             if (valorDia) {
                 valor = valorDia.valor_cp
@@ -265,14 +250,12 @@ function getData(desde, hasta, data) {
                 tenencia = null
             }
 
-
             valores.push(valor)
             tenencias.push(tenencia)
         })
         array.values.push(valores)
         array.holdings.push(tenencias)
     })
-    // console.log({ array });
 
     const { days, labels, values, holdings } = array
     return { days, labels, values, holdings };
@@ -564,7 +547,6 @@ async function setup() {
                     stacked: true,
                     ticks: {
                         callback: label => {
-                            // console.log(label.replace('.', ''));
                             return label.replace('.', '');
                         },
                         minor: {
@@ -624,8 +606,7 @@ async function setup() {
                     break;
                 default:
             }
-            console.log(myChart.data.labels[myChart.data.labels.length - 1]);
-            const dif = moment(myChart.data.labels[0]).diff(moment(new Date()).subtract(opcion, 'days'), 'days');
+            const dif = moment(myChart.data.labels[0]).diff(moment(myChart.data.labels[myChart.data.labels.length - 1]).subtract(opcion, 'days'), 'days');
             if (dif < 0) {
                 let days = myChart.data.labels.filter(dia => moment(dia).isSameOrBefore(moment(myChart.data.labels[myChart.data.labels.length - 1]).subtract(opcion, 'days'))).length;
                 deleteDays(days, myChart);
@@ -654,20 +635,19 @@ function delta(arr) {
 
 function deleteDays(days, chart) {
     chart.data.labels.splice(0, days);
-    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach(dataset => {
         dataset.data.splice(0, days);
         dataset.data = dataset.data.map((point) => {
             return point - dataset.data[0];
         });
     });
-    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset) => dataset.data.splice(0, days));
+    chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach(dataset => dataset.data.splice(0, days));
 };
 
 function addDays(from, chart) {
     let to = moment(chart.data.labels[0]).subtract(1, 'days')._d;
     const data = getData(from, to);
     const dataPos = getData(to);
-    console.log(chart.data.labels)
     data.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, i) => {
         data.holdings[i].reverse().forEach(valor => dataset.data.unshift(valor));
@@ -676,16 +656,11 @@ function addDays(from, chart) {
         dataset.data = toNumber(dataset.data);
     })
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
-        let cont = 0;
         data.values[i].reverse().forEach(valor => {
             dataset.data.unshift(valor);
-            console.log(cont);
-            cont++
         });
-        console.log(dataset.data);
         let k = 0;
-        for (var j = data.days.length, len = dataset.data.length; j < len; j++) {
-            console.log(j);
+        for (var j = data.days.length; j < dataset.data.length; j++) {
             dataset.data[j] = dataPos.values[i][k];
             k++
         }
@@ -696,4 +671,4 @@ function addDays(from, chart) {
 function toNumber(value) {
     let res = value.map(val => val ? val : 0)
     return res
-}
+};
