@@ -62,9 +62,7 @@ async function mostrarRendimientoFondo() {
         ultimaCol.style.textAlign = "left"
         ultimaCol.textContent = `Resultado Diario (%) ${dia.format("DD-MM-YYYY")}`;
     }
-    // const botones = document.querySelectorAll("obp-boton > button");
     if (tablaHTML) {
-
         for (i = 1; i < tablaHTML.childElementCount; i++) {
             let fondo = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(2)`).innerText;
             let totalFondoElm = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(7)`);
@@ -74,23 +72,21 @@ async function mostrarRendimientoFondo() {
             let r = rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             const prevVal = document.querySelector(`#val${i}`);
             if (prevVal)
-                prevVal.remove()
+                prevVal.remove();
             const val = document.createElement("a");
             val.id = `val${i}`;
             if (abs >= 0) {
-                // totalFondoElm.innerText = `+${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
                 totalFondoElm.insertBefore(val, btn);
                 val.innerText = `+${a} (+${r}%)`;
-                val.style.color = "limegreen"
+                val.style.color = "limegreen";
                 val.style.padding = '10px';
             } else {
-                // totalFondoElm.innerText = `${rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
                 totalFondoElm.insertBefore(val, btn);
                 val.innerText = `${a} (${r}%)`;
-                val.style.color = "red"
+                val.style.color = "red";
                 val.style.padding = '10px';
             };
-            totalFondoElm.style.textAlign = "left"
+            totalFondoElm.style.textAlign = "left";
         }
     }
 }
@@ -102,7 +98,6 @@ function resultadoTotal(array, fondo = undefined) {
 }
 
 function variacionResultado(tablaD, fondo = undefined) {
-    // const tablaD = await tablaDia();
     const resultadoHoy = resultadoTotal(tablaD, fondo);
     const tabla = leerLocalStorage();
     const hoy = tablaD[0].fecha;
@@ -110,7 +105,6 @@ function variacionResultado(tablaD, fondo = undefined) {
     const diaAnterior = moment.max(fechasAnteriores);
     const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
     const resultadoAnterior = resultadoTotal(datosAnteriores, fondo);
-
     return {
         abs: (resultadoHoy - resultadoAnterior),
         rel: (resultadoHoy - resultadoAnterior) / resultadoAnterior * 100,
@@ -129,7 +123,6 @@ function mostrarPorcentajeVariacion(variacion) {
             total.innerText = `${abs} (${rel}%)`
             total.style.color = "red"
         };
-
         total.style.textAlign = "left"
         // total.style.fontSize = "16px"
     }
@@ -137,41 +130,23 @@ function mostrarPorcentajeVariacion(variacion) {
 
 function leerLocalStorage() {
     let data = JSON.parse(localStorage.getItem('data'));
-    if (data) {
-        for (var i = 0; i < data.length; i++) {
-            data[i].fecha = moment(data[i].fecha);
-        }
-    }
+    data ? data.forEach(el => el.fecha = moment(el.fecha)) : data
     return data
 }
 
 function guardarTabla(tabla) {
     const data = leerLocalStorage();
     const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
-    if (tabla)
+    if (tabla) {
         tabla.forEach(el => dataFiltro.unshift(el));
-    localStorage.setItem('data', JSON.stringify(dataFiltro));
-    console.log('Se guardaron los datos en la memoria.');
-}
-
-//ya no se usa, la funcion diaF contempla los feriados
-function dia(date) {
-    //date debe ser de tipo moment
-    if (date.hour() < 8) {
-        date.subtract(1, 'day')
+        localStorage.setItem('data', JSON.stringify(dataFiltro));
+        console.log('Se guardaron los datos en la memoria.');
     }
-    if (date.day() == 0) {
-        date.add(1, 'day');
-    } else if (date.day() == 6) {
-        date.add(2, 'day');
-    }
-    return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
 }
 
 //funcion diaF contempla días feriados
 async function diaF(date) {
     //date debe ser de tipo moment
-    // let fecha = date.format("YYYY-MM-DD");
     if (date.hour() < 8) {
         date.subtract(1, 'day');
     }
@@ -182,13 +157,11 @@ async function diaF(date) {
         // console.log('es domingo');
         date.add(1, 'day');
     }
-    let esDiaFeriado = await isFeriado(moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])._d);
+    let esDiaFeriado = await isHoliday(moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])._d);
     if (esDiaFeriado) {
         console.log('es feriado');
         return diaF(moment([date.year(), date.month(), date.date(), 8, 0, 0, 0]).add(1, 'day'));
-
     } else {
-        // console.log(fecha);
         return moment([date.year(), date.month(), date.date(), 0, 0, 0, 0])
     }
 }
@@ -202,41 +175,31 @@ document.addEventListener("DOMContentLoaded", function (event) {
     btn.innerText = "Guardar";
 });
 
-function esFeriado(fecha) {
-    let dia = moment(fecha);
-    let year = fecha.getFullYear();
-    return fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
-        .then(data => data.json())
-        .then(res => res.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0])))
-        .then(res => (res.filter(el => el.isSame(dia)).length))
-        .catch(err => console.error(err));
-}
-
-async function isFeriado(fecha) {
-    let dia = moment(fecha);
-    let year = fecha.getFullYear();
-    let feriados = await fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
-    let feriadosJson = await feriados.json();
-    let feriadosMoment = feriadosJson.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0]));
-    let filtrado = feriadosMoment.filter(el => el.isSame(dia));
+async function isHoliday(fecha) {
+    const dia = moment(fecha);
+    const year = fecha.getFullYear();
+    const feriados = await fetch(`https://nolaborables.com.ar/api/v2/feriados/${year}`)
+    const feriadosJson = await feriados.json();
+    const feriadosMoment = feriadosJson.map(el => el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0]));
+    const filtrado = feriadosMoment.filter(el => el.isSame(dia));
     return filtrado.length
 }
 
-function getData(desde, hasta, data) {
+function getData(from, to, data) {
     data = data || localStorage.getItem('data');
-    hasta = hasta || JSON.parse(data)[0].fecha;
-    const datos = desde ? JSON.parse(data).reverse().filter(el => moment(el.fecha).isBetween(moment(desde), moment(hasta), undefined, '[]')) : JSON.parse(data).reverse();
+    to = to || JSON.parse(data)[0].fecha;
+    const datos = from ? JSON.parse(data).reverse().filter(el => moment(el.fecha).isBetween(moment(from), moment(to), undefined, '[]')) : JSON.parse(data).reverse();
     let array = {}
-    const etiquetas = [...new Set(datos.map(item => item.fondo))]
+    const fondos = [...new Set(datos.map(item => item.fondo))]
     const fechas = datos.reduce((acc, { fecha, fondo, valor_cp, tenencia }) => {
         (acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp, tenencia })
         return acc
     }, {})
     array.days = Object.keys(fechas)
-    array.labels = etiquetas.sort()
+    array.labels = fondos.sort()
     array.values = []
     array.holdings = []
-    etiquetas.forEach((fondo) => {
+    fondos.forEach(fondo => {
         let valores = []
         let tenencias = []
         Object.keys(fechas).forEach(fecha => {
@@ -256,7 +219,6 @@ function getData(desde, hasta, data) {
         array.values.push(valores)
         array.holdings.push(tenencias)
     })
-
     const { days, labels, values, holdings } = array
     return { days, labels, values, holdings };
 }
@@ -272,29 +234,27 @@ function injectChart() {
     const boton4 = document.createElement("button");
     const boton5 = document.createElement("button");
     div.classList.add('chart-container2');
-    boton1.textContent = '10d';
-    boton1.classList.add('toggleScale');
     boton1.id = '10d';
-    boton1.style.margin = "5px";
-    boton2.textContent = '30d';
-    boton2.classList.add('toggleScale');
     boton2.id = '30d';
-    boton2.style.margin = "5px";
-    boton3.textContent = '60d';
-    boton3.classList.add('toggleScale');
     boton3.id = '60d';
-    boton3.style.margin = "5px";
-    boton4.textContent = 'Reset';
-    boton4.classList.add('toggleScale');
     boton4.id = 'reset';
-    boton4.style.margin = "5px";
-    boton5.textContent = 'Borrar';
-    boton5.classList.add('toggleScale');
     boton5.id = 'borrar';
+    boton1.textContent = '10d';
+    boton2.textContent = '30d';
+    boton3.textContent = '60d';
+    boton4.textContent = 'Reset';
+    boton5.textContent = 'Borrar';
+    boton1.style.margin = "5px";
+    boton2.style.margin = "5px";
+    boton3.style.margin = "5px";
+    boton4.style.margin = "5px";
     boton5.style.margin = "5px";
-    // div.style.backgroundColor = 'white'
+    boton1.classList.add('toggleScale');
+    boton2.classList.add('toggleScale');
+    boton3.classList.add('toggleScale');
+    boton4.classList.add('toggleScale');
+    boton5.classList.add('toggleScale');
     div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
-    // if (prevChart) footer.removeChild(prevChart);
     if (!prevChart) {
         footer.appendChild(boton1)
         footer.appendChild(boton2)
@@ -313,9 +273,7 @@ async function setup() {
     const data = getData();
     const borderWidth = 1;
     const showLine = true;
-    console.log(data);
     let type = 'Todo';
-    const alfa = 0.2;
     let config = {
         data: {
             labels: data.days,
@@ -378,10 +336,10 @@ async function setup() {
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[0],
-                        data: toNumber(data.holdings[0]),
+                        data: toNumbers(data.holdings[0]),
                         borderWidth: false,
-                        borderColor: 'rgba(255, 99, 132, 0)',
-                        backgroundColor: `rgba(255, 99, 132, ${alfa})`,
+                        borderColor: 'rgba(255, 99, 132, 0.0)',
+                        backgroundColor: `rgba(255, 99, 132, 0.2)`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     },
@@ -394,10 +352,10 @@ async function setup() {
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[1],
-                        data: toNumber(data.holdings[1]),
+                        data: toNumbers(data.holdings[1]),
                         borderWidth: false,
-                        borderColor: 'rgba(99, 200, 132, 0)',
-                        backgroundColor: `rgba(99, 200, 132, ${alfa})`,
+                        borderColor: 'rgba(99, 200, 132, 0.0)',
+                        backgroundColor: `rgba(99, 200, 132, 0.2)`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     },
@@ -410,10 +368,10 @@ async function setup() {
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[2],
-                        data: toNumber(data.holdings[2]),
+                        data: toNumbers(data.holdings[2]),
                         borderWidth: false,
-                        borderColor: 'rgba(54, 162, 235, 0)',
-                        backgroundColor: `rgba(54, 162, 235, ${alfa})`,
+                        borderColor: 'rgba(54, 162, 235, 0.0)',
+                        backgroundColor: `rgba(54, 162, 235, 0.2)`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     },
@@ -426,10 +384,10 @@ async function setup() {
                         barPercentage: 1,
                         categoryPercentage: .9,
                         label: data.labels[3],
-                        data: toNumber(data.holdings[3]),
+                        data: toNumbers(data.holdings[3]),
                         borderWidth: false,
-                        borderColor: 'rgba(153, 102, 255, 0)',
-                        backgroundColor: `rgba(153, 102, 255, ${alfa})`,
+                        borderColor: 'rgba(153, 102, 255, 0.0)',
+                        backgroundColor: `rgba(153, 102, 255, 0.2)`,
                         spanGaps: true,
                         yAxisID: 'y1',
                     }
@@ -466,7 +424,7 @@ async function setup() {
                 bodySpacing: 3,
                 borderWidth: 1,
                 callbacks: {
-                    title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY').replace('.', ''),
+                    title: tooltipItem => tooltipItem[0] ? moment(tooltipItem[0].label).format('DD MMM YYYY').replace('.', '') : '',
                     label: (tooltipItem, data) => {
                         var label = data.datasets[tooltipItem.datasetIndex].label || '';
 
@@ -480,10 +438,6 @@ async function setup() {
                 filter: function (tooltipItem) {
                     return tooltipItem.datasetIndex < 4;
                 },
-                // callbacks: {
-                //     title: tooltipItem => moment(tooltipItem[0].label).format('DD MMM YYYY'),
-                //     label: tooltipItem => `${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
-                // },
                 bodyAlign: 'right',
                 position: 'average'
             },
@@ -492,7 +446,6 @@ async function setup() {
                     tension: 0
                 },
                 point: {
-                    // radius: 8,
                     intersect: false,
                     mode: 'x-axis',
                     hoverRadius: 5,
@@ -514,7 +467,6 @@ async function setup() {
                     id: 'y',
                     position: 'left',
                     ticks: {
-                        // Include a dollar sign in the ticks
                         callback: value => `${value.toLocaleString('de-DE')}%`
                     }
                 },
@@ -534,7 +486,6 @@ async function setup() {
                     ticks: {
                         // max: 800000,
                         beginAtZero: true,
-                        // Include a dollar sign in the ticks
                         callback: value => `$ ${value.toLocaleString('de-DE')}`
                     }
                 }],
@@ -653,7 +604,7 @@ function addDays(from, chart) {
         data.holdings[i].reverse().forEach(valor => dataset.data.unshift(valor));
     });
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach(dataset => {
-        dataset.data = toNumber(dataset.data);
+        dataset.data = toNumbers(dataset.data);
     })
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
         data.values[i].reverse().forEach(valor => {
@@ -668,7 +619,7 @@ function addDays(from, chart) {
     });
 };
 
-function toNumber(value) {
-    let res = value.map(val => val ? val : 0)
+function toNumbers(array) {
+    let res = array.map(val => val ? val : 0)
     return res
 };
