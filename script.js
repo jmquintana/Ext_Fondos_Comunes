@@ -186,9 +186,9 @@ async function isHoliday(fecha) {
 }
 
 function getData(from, to, data) {
-    data = data || localStorage.getItem('data');
-    to = to || JSON.parse(data)[0].fecha;
-    const datos = from ? JSON.parse(data).reverse().filter(el => moment(el.fecha).isBetween(moment(from), moment(to), undefined, '[]')) : JSON.parse(data).reverse();
+    data = data || JSON.parse(localStorage.getItem('data'));
+    to = to || data[0].fecha;
+    const datos = from ? data.reverse().filter(el => moment(el.fecha).isBetween(moment(from), moment(to), undefined, '[]')) : data.reverse();
     let array = {}
     const fondos = [...new Set(datos.map(item => item.fondo))]
     const fechas = datos.reduce((acc, { fecha, fondo, valor_cp, tenencia }) => {
@@ -260,7 +260,7 @@ function injectChart() {
         footer.appendChild(boton2)
         footer.appendChild(boton3)
         footer.appendChild(boton4)
-        footer.appendChild(boton5)
+        // footer.appendChild(boton5)
         footer.appendChild(div)
     } else {
         return
@@ -619,7 +619,23 @@ function addDays(from, chart) {
     });
 };
 
-function toNumbers(array) {
-    let res = array.map(val => val ? val : 0)
+const toNumbers = array => array.map(val => val ? val : 0)
+const toMonth = array => array.map(day => moment(day).subtract(moment(day).date() - 1, 'days').toJSON())
+
+const maxDates = () => {
+    const data = leerLocalStorage()
+    let fechas = [...new Set(data.map(el => el.fecha))]
+    let fech = [...new Set(fechas.map(el => moment(el).subtract(moment(el).date() - 1, 'days').toJSON()))]
+    let res = []
+    fech.forEach(mes => {
+        let filtrado = fechas.filter(fecha => moment(fecha).isBetween(moment(mes), moment(mes).add(1, 'months').subtract(1, 'days')), undefined, '[]').map(el => moment(el))
+        res.push(moment.max(filtrado).toJSON())
+    })
     return res
-};
+}
+
+const filterDataMaxDates = () => {
+    let datos = JSON.parse(localStorage.getItem('data'))
+    let max = maxDates()
+    return datos.filter(data => max.find(el => el == data.fecha) ? true : false)
+}
