@@ -35,6 +35,8 @@ let cargado = false;
 
 async function acciones(e) {
     if (!cargado && e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
+        // moment.locale('es')
+        console.log('moment.locale() = ', moment.locale());
         e.preventDefault();
         let tablaD = await tablaDia();
         guardarTabla(tablaD);
@@ -166,14 +168,14 @@ async function diaF(date) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function (event) {
-    console.log('dentro del ready');
-    var descargar = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer");
-    var btn = document.createElement("a");
-    descargar.appendChild(btn);
-    btn.id = "btnExt";
-    btn.innerText = "Guardar";
-});
+// document.addEventListener("DOMContentLoaded", function (event) {
+//     console.log('dentro del ready');
+//     var descargar = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer");
+//     var btn = document.createElement("a");
+//     descargar.appendChild(btn);
+//     btn.id = "btnExt";
+//     btn.innerText = "Guardar";
+// });
 
 async function isHoliday(fecha) {
     const dia = moment(fecha);
@@ -265,6 +267,7 @@ function injectChart() {
     } else {
         return
     }
+    moment.locale('es')
     setup();
 }
 
@@ -497,9 +500,9 @@ async function setup() {
                     offsetGridLines: false,
                     stacked: true,
                     ticks: {
-                        callback: label => {
-                            return label.replace('.', '');
-                        },
+                        // callback: label => {
+                        //     return label.replace('.', '');
+                        // },
                         minor: {
                             type: 'time',
                             time: {
@@ -508,6 +511,7 @@ async function setup() {
                         },
                     },
                     type: 'time',
+                    distribution: 'linear',
                     time: {
                         displayFormats: {
                             month: 'MMM YYYY'
