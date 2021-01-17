@@ -393,9 +393,7 @@ async function setup() {
                         backgroundColor: `rgba(153, 102, 255, 0.2)`,
                         spanGaps: true,
                         yAxisID: 'y1',
-                    }
-
-                ]
+                    }]
         },
         options: {
             plugins: {
