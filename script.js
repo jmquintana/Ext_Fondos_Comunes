@@ -188,9 +188,9 @@ async function isHoliday(fecha) {
 }
 
 function getData(from, to, data) {
-    data = data || JSON.parse(localStorage.getItem('data'));
-    to = to || data[0].fecha;
-    const datos = from ? data.reverse().filter(el => moment(el.fecha).isBetween(moment(from), moment(to), undefined, '[]')) : data.reverse();
+    data = data || JSON.parse(localStorage.getItem('data'))
+    to = to || data[0].fecha
+    const datos = from ? data.reverse().filter(el => moment(el.fecha).isBetween(moment(from), moment(to), undefined, '[]')) : data.reverse()
     let array = {}
     const fondos = [...new Set(datos.map(item => item.fondo))]
     const fechas = datos.reduce((acc, { fecha, fondo, valor_cp, tenencia }) => {
@@ -211,7 +211,7 @@ function getData(from, to, data) {
                 valor = valorDia.valor_cp
                 tenencia = valorDia.tenencia
             } else {
-                valor = null;
+                valor = null
                 tenencia = null
             }
 
@@ -222,20 +222,22 @@ function getData(from, to, data) {
         array.holdings.push(tenencias)
     })
     const { days, labels, values, holdings } = array
-    return { days, labels, values, holdings };
+    return { days, labels, values, holdings }
 }
 
 function injectChart() {
     const footer = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer")
-    footer.style.height = "650px"
+    footer.style.height = "1300px"
     let prevChart = document.querySelector('div.chart-container2');
-    const div = document.createElement("div");
+    const div1 = document.createElement("div");
+    const div2 = document.createElement("div");
     const boton1 = document.createElement("button");
     const boton2 = document.createElement("button");
     const boton3 = document.createElement("button");
     const boton4 = document.createElement("button");
     const boton5 = document.createElement("button");
-    div.classList.add('chart-container2');
+    div1.classList.add('chart-container2');
+    div2.classList.add('chart-container3');
     boton1.id = '10d';
     boton2.id = '30d';
     boton3.id = '60d';
@@ -256,19 +258,22 @@ function injectChart() {
     boton3.classList.add('toggleScale');
     boton4.classList.add('toggleScale');
     boton5.classList.add('toggleScale');
-    div.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
+    div1.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
+    div2.innerHTML = `<canvas id="myChart2" aria-label="Hello ARIA World" role="img"></canvas>`;
     if (!prevChart) {
         footer.appendChild(boton1)
         footer.appendChild(boton2)
         footer.appendChild(boton3)
         footer.appendChild(boton4)
         // footer.appendChild(boton5)
-        footer.appendChild(div)
+        footer.appendChild(div1)
+        footer.appendChild(div2)
     } else {
         return
     }
     moment.locale('es')
     setup();
+    setup2();
 }
 
 async function setup() {
@@ -498,9 +503,9 @@ async function setup() {
                     offsetGridLines: false,
                     stacked: true,
                     ticks: {
-                        // callback: label => {
-                        //     return label.replace('.', '');
-                        // },
+                        callback: label => {
+                            return translateDate(label);
+                        },
                         minor: {
                             type: 'time',
                             time: {
@@ -514,7 +519,7 @@ async function setup() {
                         displayFormats: {
                             month: 'MMM YYYY'
                         },
-                        unit: 'day'
+                        unit: 'month'
                     }
                 }]
             }
@@ -640,4 +645,157 @@ const filterDataMaxDates = () => {
     let datos = JSON.parse(localStorage.getItem('data'))
     let max = maxDates()
     return datos.filter(data => max.find(el => el == data.fecha) ? true : false)
+}
+
+const translateDate = input => {
+    let date = moment(input)
+    const monthName = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+    const newMonth = monthName[date.month()]
+    const res = input.replace(/\w{3}/, newMonth)
+
+    return res.replace(/(\w{3})\s(\w{1,2}\b)/g, '$2 $1')
+}
+
+async function setup2() {
+    const ctx = document.getElementById('myChart2').getContext('2d');
+    const data = getData(undefined, undefined, filterDataMaxDates());
+    console.log(data);
+    const borderWidth = 1;
+    let config = {
+        type: 'bar',
+        data: {
+            labels: toMonth(data.days),
+            datasets:
+                [
+                    {
+                        order: 4,
+                        barPercentage: 0.88,
+                        categoryPercentage: .96,
+                        label: data.labels[0],
+                        data: toNumbers(data.holdings[0]),
+                        borderWidth: borderWidth,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: `rgba(255, 99, 132, 0.2)`,
+                        // spanGaps: true,
+                        yAxisID: 'y1',
+                    },
+                    {
+                        order: 5,
+                        barPercentage: 0.88,
+                        categoryPercentage: .96,
+                        label: data.labels[1],
+                        data: toNumbers(data.holdings[1]),
+                        borderWidth: borderWidth,
+                        borderColor: 'rgba(99, 200, 132, 1)',
+                        backgroundColor: `rgba(99, 200, 132, 0.2)`,
+                        // spanGaps: true,
+                        yAxisID: 'y1',
+                    },
+                    {
+                        order: 6,
+                        barPercentage: 0.88,
+                        categoryPercentage: .96,
+                        label: data.labels[2],
+                        data: toNumbers(data.holdings[2]),
+                        borderWidth: borderWidth,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: `rgba(54, 162, 235, 0.2)`,
+                        // spanGaps: true,
+                        yAxisID: 'y1',
+                    },
+                    {
+                        order: 7,
+                        barPercentage: 0.88,
+                        categoryPercentage: .96,
+                        label: data.labels[3],
+                        data: toNumbers(data.holdings[3]),
+                        borderWidth: borderWidth,
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: `rgba(153, 102, 255, 0.2)`,
+                        // spanGaps: true,
+                        yAxisID: 'y1',
+                    }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Fondos Comunes de Inversión Tenencia Mensual'
+            },
+            tooltips: {
+                mode: 'x-axis',
+                intersect: false,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                titleFontFamily: 'Open Sans',
+                titleFontSize: 14,
+                titleFontColor: 'rgba(0, 0, 0, 0.7)',
+                titleFontStyle: 'bold',
+                titleAlign: 'center',
+                bodyFontFamily: 'Open Sans',
+                // bodyFontSize: 14,
+                bodyFontColor: 'rgba(0, 0, 0, 0.7)',
+                borderColor: 'rgba(122, 122, 122, 0.2)',
+                bodySpacing: 3,
+                borderWidth: 1,
+                callbacks: {
+                    title: tooltipItem => tooltipItem[0] ? moment(tooltipItem[0].label).format('MMM YYYY').replace('.', '') : '',
+                    label: (tooltipItem, data) => {
+                        var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += `$${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        return label;
+                    }
+                },
+                filter: function (tooltipItem) {
+                    return tooltipItem.datasetIndex < 4;
+                },
+                bodyAlign: 'right',
+                position: 'average'
+            },
+            legend: {
+                display: true,
+                position: 'bottom',
+                itemWidth: 350
+            },
+            hover: {
+                mode: 'x-axis',
+                intersect: true
+            },
+            scales: {
+                yAxes: [{
+                    id: 'y1',
+                    stacked: false,
+                    ticks: {
+                        // max: 20,
+                        beginAtZero: true,
+                        callback: value => `$ ${value.toLocaleString('de-DE')}`
+                    }
+                }],
+                xAxes: [{
+                    gridLines: {
+                        display: true,
+                        offsetGridLines: true
+                    },
+                    offsetGridLines: true,
+                    stacked: false,
+                    ticks: {
+                        callback: label => {
+                            return moment(label).format('MMM YYYY').replace('.', '');
+                        }
+                    },
+                    type: 'category',
+                    // distribution: 'series',
+                    time: {
+                        displayFormats: {
+                            month: 'MMM YYYY'
+                        },
+                        unit: 'month'
+                    }
+                }]
+            }
+        }
+    };
+    const myChart2 = new Chart(ctx, config);
 }
