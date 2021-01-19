@@ -786,12 +786,16 @@ async function setup2() {
                 backgroundColor: 'rgba(255, 255, 255, 0.8)',
                 titleFontFamily: 'Open Sans',
                 titleFontSize: 14,
+                footerFontSize: 14,
                 titleFontColor: 'rgba(0, 0, 0, 0.7)',
                 titleFontStyle: 'bold',
                 titleAlign: 'center',
+                footerAlign: 'center',
                 bodyFontFamily: 'Open Sans',
                 // bodyFontSize: 14,
                 bodyFontColor: 'rgba(0, 0, 0, 0.7)',
+                footerFontColor: 'rgba(0, 0, 0, 0.7)',
+                footerFontStyle: 'bold',
                 borderColor: 'rgba(122, 122, 122, 0.2)',
                 bodySpacing: 3,
                 borderWidth: 1,
@@ -805,6 +809,10 @@ async function setup2() {
                         }
                         label += `$${tooltipItem.yLabel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                         return label;
+                    },
+                    footer: (tooltipItem, data) => {
+                        // console.log(tooltipItem);
+                        return label = 'Total:            $' + tooltipItem.reduce((sum, cur) => cur.yLabel + sum, 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     }
                 },
                 filter: function (tooltipItem) {
