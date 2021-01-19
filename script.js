@@ -9,7 +9,7 @@ function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado
     this.valor_cp = valor_cp;
     this.tenencia = tenencia;
     this.resultado = resultado;
-    this.obtenerBeneficio = () => {
+    this.getProfit = () => {
         const data = leerLocalStorage();
         const filtro = data.filter(registro => registro.fondo == this.fondo)
         const hoy = this.fecha;
@@ -165,8 +165,8 @@ function rebuild() {
             )
         )
     )
-    return res;
-}
+    return res
+};
 
 function guardarTabla(tabla) {
     if (tabla) {
@@ -666,12 +666,12 @@ const toNumbers = array => array.map(val => val ? val : 0)
 const toMonth = array => array.map(day => moment(day).subtract(moment(day).date() - 1, 'days').toJSON())
 
 const maxDates = () => {
-    const data = leerLocalStorage()
+    const data = rebuild()
     let fechas = [...new Set(data.map(el => el.fecha))]
-    let fech = [...new Set(fechas.map(el => moment(el).subtract(moment(el).date() - 1, 'days').toJSON()))]
+    let meses = [...new Set(fechas.map(el => moment(el).subtract(moment(el).date() - 1, 'days').toJSON()))]
     let res = []
-    fech.forEach(mes => {
-        let filtrado = fechas.filter(fecha => moment(fecha).isBetween(moment(mes), moment(mes).add(1, 'months').subtract(1, 'days')), undefined, '[]').map(el => moment(el))
+    meses.forEach(mes => {
+        const filtrado = fechas.filter(fecha => moment(fecha).isBetween(moment(mes), moment(mes).add(1, 'months').subtract(1, 'days')), undefined, '[]').map(el => moment(el))
         res.push(moment.max(filtrado).toJSON())
     })
     return res
@@ -681,6 +681,29 @@ const filterDataMaxDates = () => {
     let datos = JSON.parse(localStorage.getItem('data'))
     let max = maxDates()
     return datos.filter(data => max.find(el => el == data.fecha) ? true : false)
+}
+
+const monthlyProfit = () => {
+    const data = rebuild();
+    const fechas = [...new Set(data.map(el => el.fecha))].sort();
+    const fondos = [...new Set(data.map(item => item.fondo))].sort();
+    const months = [...new Set(fechas.map(el => moment(el).subtract(moment(el).date() - 1, 'days').toJSON()))];
+    const profits = [];
+    fondos.forEach(fondo => {
+        let profitsByFondo = [];
+        months.forEach(month => {
+            let profitsByMonth = 0;
+            let filtered = data.filter(reg => {
+                return reg.fondo === fondo &&
+                    moment(reg.fecha).isBetween(moment(month), moment(month).add(1, 'months').subtract(1, 'days'), undefined, '[]')
+            })
+            // console.log(filtered);
+            profitsByMonth = filtered.reduce((acc, cur) => acc + cur.getProfit(), 0);
+            profitsByFondo.push(profitsByMonth);
+        })
+        profits.push(profitsByFondo)
+    })
+    return { months, fondos, profits }
 }
 
 const translateDate = input => {
@@ -694,21 +717,21 @@ const translateDate = input => {
 
 async function setup2() {
     const ctx = document.getElementById('myChart2').getContext('2d');
-    const data = getData(undefined, undefined, filterDataMaxDates());
+    const data = monthlyProfit();
     console.log(data);
     const borderWidth = 1;
     let config = {
         type: 'bar',
         data: {
-            labels: toMonth(data.days),
+            labels: toMonth(data.months),
             datasets:
                 [
                     {
                         order: 4,
                         barPercentage: 0.88,
                         categoryPercentage: .96,
-                        label: data.labels[0],
-                        data: toNumbers(data.holdings[0]),
+                        label: data.fondos[0],
+                        data: toNumbers(data.profits[0]),
                         borderWidth: borderWidth,
                         borderColor: 'rgba(255, 99, 132, 1)',
                         backgroundColor: `rgba(255, 99, 132, 0.2)`,
@@ -719,8 +742,8 @@ async function setup2() {
                         order: 5,
                         barPercentage: 0.88,
                         categoryPercentage: .96,
-                        label: data.labels[1],
-                        data: toNumbers(data.holdings[1]),
+                        label: data.fondos[1],
+                        data: toNumbers(data.profits[1]),
                         borderWidth: borderWidth,
                         borderColor: 'rgba(99, 200, 132, 1)',
                         backgroundColor: `rgba(99, 200, 132, 0.2)`,
@@ -731,8 +754,8 @@ async function setup2() {
                         order: 6,
                         barPercentage: 0.88,
                         categoryPercentage: .96,
-                        label: data.labels[2],
-                        data: toNumbers(data.holdings[2]),
+                        label: data.fondos[2],
+                        data: toNumbers(data.profits[2]),
                         borderWidth: borderWidth,
                         borderColor: 'rgba(54, 162, 235, 1)',
                         backgroundColor: `rgba(54, 162, 235, 0.2)`,
@@ -743,8 +766,8 @@ async function setup2() {
                         order: 7,
                         barPercentage: 0.88,
                         categoryPercentage: .96,
-                        label: data.labels[3],
-                        data: toNumbers(data.holdings[3]),
+                        label: data.fondos[3],
+                        data: toNumbers(data.profits[3]),
                         borderWidth: borderWidth,
                         borderColor: 'rgba(153, 102, 255, 1)',
                         backgroundColor: `rgba(153, 102, 255, 0.2)`,
@@ -755,7 +778,7 @@ async function setup2() {
         options: {
             title: {
                 display: true,
-                text: 'Fondos Comunes de Inversión Tenencia Mensual'
+                text: 'Fondos Comunes de Inversión Resultado Mensual'
             },
             tooltips: {
                 mode: 'x-axis',
