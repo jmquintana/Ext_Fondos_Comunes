@@ -9,7 +9,20 @@ function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado
     this.valor_cp = valor_cp;
     this.tenencia = tenencia;
     this.resultado = resultado;
-}
+    this.obtenerBeneficio = () => {
+        const data = leerLocalStorage();
+        const filtro = data.filter(registro => registro.fondo == this.fondo)
+        const hoy = this.fecha;
+        const fechasAnteriores = filtro.map(el => el.fecha).filter(el => el.isBefore(hoy));
+        if (fechasAnteriores.length) {
+            const diaAnterior = moment.max(fechasAnteriores);
+            const datosAnteriores = filtro.filter(el => el.fecha.isSame(diaAnterior));
+            return Math.round(1000 * (this.valor_cp - datosAnteriores[0].valor_cp) * datosAnteriores[0].cuotapartes) / 1000
+        } else {
+            return 0
+        };
+    };
+};
 
 async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
@@ -136,11 +149,34 @@ function leerLocalStorage() {
     return data
 }
 
+function rebuild() {
+    const data = JSON.parse(localStorage.getItem('data'));
+    let res = [];
+    data.forEach(
+        registro => res.push(
+            new Registro(
+                registro.fecha,
+                registro.tipo,
+                registro.fondo,
+                registro.cuotapartes,
+                registro.valor_cp,
+                registro.tenencia,
+                registro.resultado
+            )
+        )
+    )
+    return res;
+}
+
 function guardarTabla(tabla) {
-    const data = leerLocalStorage();
-    const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
     if (tabla) {
-        tabla.forEach(el => dataFiltro.unshift(el));
+        const data = leerLocalStorage();
+        const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
+        tabla.forEach(el => {
+            dataFiltro.unshift(el)
+            console.log(el);
+        });
+        console.log(dataFiltro);
         localStorage.setItem('data', JSON.stringify(dataFiltro));
         console.log('Se guardaron los datos en la memoria.');
     }
