@@ -4,3 +4,7 @@ canvas#chart {
     height: 40vh;
     width: 60vw;
 }
+
+.chart-container3 {
+    margin-top: 50px;
+}

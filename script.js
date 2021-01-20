@@ -1,5 +1,6 @@
 console.log('funciona script.js')
 document.addEventListener("mouseup", acciones, false);
+let globalData = JSON.parse(localStorage.getItem('data'));
 
 function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado) {
     this.fecha = fecha;
@@ -10,19 +11,25 @@ function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado
     this.tenencia = tenencia;
     this.resultado = resultado;
     this.getProfit = () => {
-        const data = leerLocalStorage();
-        const filtro = data.filter(registro => registro.fondo == this.fondo)
-        const hoy = this.fecha;
-        const fechasAnteriores = filtro.map(el => el.fecha).filter(el => el.isBefore(hoy));
-        if (fechasAnteriores.length) {
-            const diaAnterior = moment.max(fechasAnteriores);
-            const datosAnteriores = filtro.filter(el => el.fecha.isSame(diaAnterior));
-            return Math.round(1000 * (this.valor_cp - datosAnteriores[0].valor_cp) * datosAnteriores[0].cuotapartes) / 1000
-        } else {
-            return 0
-        };
+        // const data = leerLocalStorage();
+        const filtro = globalData.filter(registro => registro.fondo === this.fondo);
+        const index = filtro.findIndex(el => el.fecha.isSame(this.fecha));
+        return (index < filtro.length - 1) ? Math.round(1000 * (this.valor_cp - filtro[index + 1].valor_cp) * filtro[index + 1].cuotapartes) / 1000 : 0;
     };
 };
+// {
+//     const data = leerLocalStorage();
+//     const filtro = data.filter(registro => registro.fondo == this.fondo)
+//     const hoy = this.fecha;
+//     const fechasAnteriores = filtro.map(el => el.fecha).filter(el => el.isBefore(hoy));
+//     if (fechasAnteriores.length) {
+//         const diaAnterior = moment.max(fechasAnteriores);
+//         const datosAnteriores = filtro.filter(el => el.fecha.isSame(diaAnterior));
+//         return Math.round(1000 * (this.valor_cp - datosAnteriores[0].valor_cp) * datosAnteriores[0].cuotapartes) / 1000
+//     } else {
+//         return 0
+//     };
+// };
 
 async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
@@ -44,12 +51,20 @@ async function tablaDia() {
     return registro
 }
 
+let inicio
+let primero
+let segundo
+let loaded1 = false
+let loaded2 = false
 let cargado = false;
+// globalData = leerLocalStorage();
 
 async function acciones(e) {
     if (!cargado && e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
+        console.clear()
+        inicio = new Date()
         // moment.locale('es')
-        console.log('moment.locale() = ', moment.locale());
+        console.log('moment.locale(): ', moment.locale());
         e.preventDefault();
         let tablaD = await tablaDia();
         guardarTabla(tablaD);
@@ -57,7 +72,7 @@ async function acciones(e) {
         mostrarPorcentajeVariacion(variacionResultado(tablaD));
         injectChart();
         const dia = await diaF(moment(new Date));
-        console.log(dia.format("DD-MM-YYYY"));
+        // console.log(dia.format("DD-MM-YYYY"));
         cargado = true;
         window.scroll({
             top: 1000,
@@ -174,12 +189,11 @@ function guardarTabla(tabla) {
         const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
         tabla.forEach(el => {
             dataFiltro.unshift(el)
-            console.log(el);
         });
-        console.log(dataFiltro);
         localStorage.setItem('data', JSON.stringify(dataFiltro));
         console.log('Se guardaron los datos en la memoria.');
     }
+    globalData = leerLocalStorage();
 }
 
 //funcion diaF contempla días feriados
@@ -284,11 +298,11 @@ function injectChart() {
     boton3.textContent = '60d';
     boton4.textContent = 'Reset';
     boton5.textContent = 'Borrar';
-    boton1.style.margin = "5px";
-    boton2.style.margin = "5px";
-    boton3.style.margin = "5px";
-    boton4.style.margin = "5px";
-    boton5.style.margin = "5px";
+    boton1.style.margin = '5px';
+    boton2.style.margin = '5px';
+    boton3.style.margin = '5px';
+    boton4.style.margin = '5px';
+    boton5.style.margin = '5px';
     boton1.classList.add('toggleScale');
     boton2.classList.add('toggleScale');
     boton3.classList.add('toggleScale');
@@ -296,6 +310,7 @@ function injectChart() {
     boton5.classList.add('toggleScale');
     div1.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
     div2.innerHTML = `<canvas id="myChart2" aria-label="Hello ARIA World" role="img"></canvas>`;
+    div2.style.marginTop = '50px';
     if (!prevChart) {
         footer.appendChild(boton1)
         footer.appendChild(boton2)
@@ -437,6 +452,13 @@ async function setup() {
                     }]
         },
         options: {
+            animation: {
+                onComplete: function (animation) {
+                    primero = new Date;
+                    !loaded1 ? console.log('primer gráfico', (primero - inicio) / 1000 + " segundos") : "";
+                    loaded1 = true;
+                }
+            },
             plugins: {
                 filler: {
                     propagate: true
@@ -609,8 +631,8 @@ async function setup() {
                 addDays(from, myChart);
             };
             myChart.update({
-                duration: 800,
-                easing: 'easeOutBounce'
+                duration: 300,
+                easing: 'linear' //["linear", "easeInQuad", "easeOutQuad", "easeInOutQuad", "easeInCubic", "easeOutCubic", "easeInOutCubic", "easeInQuart", "easeOutQuart", "easeInOutQuart", "easeInQuint", "easeOutQuint", "easeInOutQuint", "easeInSine", "easeOutSine", "easeInOutSine", "easeInExpo", "easeOutExpo", "easeInOutExpo", "easeInCirc", "easeOutCirc", "easeInOutCirc", "easeInElastic", "easeOutElastic", "easeInOutElastic", "easeInBack", "easeOutBack", "easeInOutBack", "easeInBounce", "easeOutBounce", "easeInOutBounce"]
             });
         });
     });
@@ -639,23 +661,45 @@ function deleteDays(days, chart) {
 };
 
 function addDays(from, chart) {
-    let to = moment(chart.data.labels[0]).subtract(1, 'days')._d;
-    const data = getData(from, to);
-    const dataPos = getData(to);
-    data.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
+
+    let allData = getData(from);
+    let allDataLength = allData.days.length;
+    let chartData = chart.data;
+    let chartDataLength = chartData.labels.length;
+
+    const firstData = []
+    const lastData = []
+    firstData.holdings = []
+    lastData.holdings = []
+    firstData.values = []
+    lastData.values = []
+
+    firstData.days = allData.days.slice(0, allDataLength - chartDataLength);
+    allData.holdings.forEach((arr, i) => firstData.holdings[i] = arr.slice(0, allDataLength - chartDataLength));
+    allData.values.forEach((arr, i) => firstData.values[i] = arr.slice(0, allDataLength - chartDataLength));
+
+    // console.log('first', firstData)
+
+    lastData.days = allData.days.slice(allDataLength - chartDataLength);
+    allData.holdings.forEach((arr, i) => lastData.holdings[i] = arr.slice(allDataLength - chartDataLength));
+    allData.values.forEach((arr, i) => lastData.values[i] = arr.slice(allDataLength - chartDataLength));
+
+    // console.log('last', lastData)
+
+    firstData.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, i) => {
-        data.holdings[i].reverse().forEach(valor => dataset.data.unshift(valor));
+        firstData.holdings[i].reverse().forEach(valor => dataset.data.unshift(valor));
     });
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach(dataset => {
         dataset.data = toNumbers(dataset.data);
     })
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y').forEach((dataset, i) => {
-        data.values[i].reverse().forEach(valor => {
+        firstData.values[i].reverse().forEach(valor => {
             dataset.data.unshift(valor);
         });
         let k = 0;
-        for (var j = data.days.length; j < dataset.data.length; j++) {
-            dataset.data[j] = dataPos.values[i][k];
+        for (var j = firstData.days.length; j < dataset.data.length; j++) {
+            dataset.data[j] = lastData.values[i][k];
             k++
         }
         dataset.data = delta(dataset.data);
@@ -684,6 +728,8 @@ const filterDataMaxDates = () => {
 }
 
 const monthlyProfit = () => {
+    let inicio = new Date()
+    let fin
     const data = rebuild();
     const fechas = [...new Set(data.map(el => el.fecha))].sort();
     const fondos = [...new Set(data.map(item => item.fondo))].sort();
@@ -699,10 +745,12 @@ const monthlyProfit = () => {
             })
             // console.log(filtered);
             profitsByMonth = filtered.reduce((acc, cur) => acc + cur.getProfit(), 0);
-            profitsByFondo.push(profitsByMonth);
+            profitsByFondo.push(Math.round(profitsByMonth * 100) / 100);
         })
         profits.push(profitsByFondo)
     })
+    fin = new Date()
+    console.log((fin - inicio) / 1000 + " segundos")
     return { months, fondos, profits }
 }
 
@@ -776,6 +824,13 @@ async function setup2() {
                     }]
         },
         options: {
+            animation: {
+                onComplete: function (animation) {
+                    segundo = new Date;
+                    !loaded2 ? console.log('segundo gráfico', (segundo - inicio) / 1000 + " segundos") : "";
+                    loaded2 = true;
+                }
+            },
             title: {
                 display: true,
                 text: 'Fondos Comunes de Inversión Resultado Mensual'
