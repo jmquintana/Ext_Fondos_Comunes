@@ -159,13 +159,13 @@ async function chek(tablaD) {
         val.cuota = el.cuotapartes
         val.valor = el.valor_cp
         val.tenencia = Math.round(el.tenencia * 100) / 100
-        val.calculo = Math.round(el.cuotapartes * el.valor_cp * 1000) / 1000
+        val.calculo = Math.round(el.cuotapartes * el.valor_cp * 100) / 100
         val.dif = Math.round((val.tenencia - val.calculo) * 100) / 100
         val.ok = Math.abs(val.dif) <= 0.01 ? "✅" : "❌"
         table.push(val)
     })
     console.log(tablaD[0].fecha.format('DD/MM/YYYY'))
-    console.table(table,) // ["fondo", "cuota", "tenencia", "calculo", "dif"]
+    console.table(table, ["fondo", "tenencia", "calculo", "dif", "ok"])
 }
 
 function mostrarPorcentajeVariacion(variacion) {
