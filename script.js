@@ -63,10 +63,11 @@ async function acciones(e) {
     if (!cargado && e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         console.clear()
         inicio = new Date()
-        // moment.locale('es')
+        moment.locale('es')
         console.log('moment.locale(): ', moment.locale());
         e.preventDefault();
         let tablaD = await tablaDia();
+        chek(tablaD);
         guardarTabla(tablaD);
         mostrarRendimientoFondo();
         mostrarPorcentajeVariacion(variacionResultado(tablaD));
@@ -128,23 +129,49 @@ function resultadoTotal(array, fondo = undefined) {
 }
 
 function variacionResultado(tablaD, fondo = undefined) {
-    const resultadoHoy = resultadoTotal(tablaD, fondo);
     const tabla = leerLocalStorage();
-    const hoy = tablaD[0].fecha;
-    const fechasAnteriores = tabla.map(el => el.fecha).filter(el => el.isBefore(hoy));
-    const diaAnterior = moment.max(fechasAnteriores);
-    const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
-    const resultadoAnterior = resultadoTotal(datosAnteriores, fondo);
+
+    const resHoy = fondo ? tabla.filter(el => el.fondo == fondo)[0].tenencia : resultadoTotal(tabla.slice(0, 4));
+    const anterior = fondo ? tabla.filter(el => el.fondo == fondo)[1].tenencia : resultadoTotal(tabla.slice(4, 8));
+
+    // console.log('Fondo:', fondo)
+    // console.log('Resultado hoy', resHoy)
+    // console.log('Resultado anterior', anterior)
+
+    // const resultadoHoy = resultadoTotal(tablaD, fondo);
+
+    // const hoy = tablaD[0].fecha;
+    // const fechasAnteriores = tabla.map(el => el.fecha).filter(el => el.isBefore(hoy, 'day'));
+    // const diaAnterior = moment.max(fechasAnteriores);
+    // const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
+    // const resultadoAnterior = resultadoTotal(datosAnteriores, fondo);
     return {
-        abs: (resultadoHoy - resultadoAnterior),
-        rel: (resultadoHoy - resultadoAnterior) / resultadoAnterior * 100,
+        abs: (resHoy - anterior),
+        rel: (resHoy - anterior) / anterior * 100,
     };
+}
+
+async function chek(tablaD) {
+    let table = []
+    tablaD.forEach((el, i) => {
+        let val = {};
+        val.fondo = el.fondo.replace(/Sup[[a-zA-ZÀ-ÿ]+\s/, '')
+        val.cuota = el.cuotapartes
+        val.valor = el.valor_cp
+        val.tenencia = Math.round(el.tenencia * 100) / 100
+        val.calculo = Math.round(el.cuotapartes * el.valor_cp * 1000) / 1000
+        val.dif = Math.round((val.tenencia - val.calculo) * 100) / 100
+        val.ok = Math.abs(val.dif) <= 0.01 ? "✅" : "❌"
+        table.push(val)
+    })
+    console.log(tablaD[0].fecha.format('DD/MM/YYYY'))
+    console.table(table,) // ["fondo", "cuota", "tenencia", "calculo", "dif"]
 }
 
 function mostrarPorcentajeVariacion(variacion) {
     const total = document.querySelector("table > tbody > tr.totales > th:nth-child(7)");
-    const abs = variacion.abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const rel = variacion.rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const abs = variacion.abs.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const rel = variacion.rel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (total) {
         if (variacion.abs >= 0) {
             total.innerText = `+${abs} (+${rel}%)`
@@ -453,6 +480,8 @@ async function setup() {
         },
         options: {
             animation: {
+                easing: 'easeOutElastic',
+                duration: '1000',
                 onComplete: function (animation) {
                     primero = new Date;
                     !loaded1 ? console.log('primer gráfico', (primero - inicio) / 1000 + " segundos") : "";
@@ -524,7 +553,8 @@ async function setup() {
             },
             hover: {
                 mode: 'x-axis',
-                intersect: true
+                intersect: true,
+                // animationDuration: 0,
             },
             scales: {
                 yAxes: [{
@@ -631,19 +661,26 @@ async function setup() {
                 addDays(from, myChart);
             };
             myChart.update({
-                duration: 300,
-                easing: 'linear' //["linear", "easeInQuad", "easeOutQuad", "easeInOutQuad", "easeInCubic", "easeOutCubic", "easeInOutCubic", "easeInQuart", "easeOutQuart", "easeInOutQuart", "easeInQuint", "easeOutQuint", "easeInOutQuint", "easeInSine", "easeOutSine", "easeInOutSine", "easeInExpo", "easeOutExpo", "easeInOutExpo", "easeInCirc", "easeOutCirc", "easeInOutCirc", "easeInElastic", "easeOutElastic", "easeInOutElastic", "easeInBack", "easeOutBack", "easeInOutBack", "easeInBounce", "easeOutBounce", "easeInOutBounce"]
+                duration: 1000,
+                easing: 'easeOutElastic' // ["linear", "easeInQuad", "easeOutQuad", "easeInOutQuad",
+                // "easeInCubic", "easeOutCubic", "easeInOutCubic", "easeInQuart",
+                // "easeOutQuart", "easeInOutQuart", "easeInQuint", "easeOutQuint",
+                // "easeInOutQuint", "easeInSine", "easeOutSine", "easeInOutSine",
+                // "easeInExpo", "easeOutExpo", "easeInOutExpo", "easeInCirc",
+                // "easeOutCirc", "easeInOutCirc", "easeInElastic", "easeOutElastic",
+                // "easeInOutElastic", "easeInBack", "easeOutBack", "easeInOutBack",
+                // "easeInBounce", "easeOutBounce", "easeInOutBounce"]
             });
         });
     });
 }
 
 function delta(arr) {
-    let res = [];
+    const res = [];
     let acc = 0
     arr.forEach((cur, ind, vec) => {
-        let vari = (cur - vec[ind - 1]) / vec[ind - 1] * 100 || 0
-        acc = (acc || (vari != Infinity)) ? acc + vari : acc
+        let vari = (cur / vec[ind - 1] - 1) * 100 || 0
+        acc = ((vari != Infinity)) ? acc + vari : acc
         res.push(acc);
     })
     return res
@@ -709,24 +746,6 @@ function addDays(from, chart) {
 const toNumbers = array => array.map(val => val ? val : 0)
 const toMonth = array => array.map(day => moment(day).subtract(moment(day).date() - 1, 'days').toJSON())
 
-const maxDates = () => {
-    const data = rebuild()
-    let fechas = [...new Set(data.map(el => el.fecha))]
-    let meses = [...new Set(fechas.map(el => moment(el).subtract(moment(el).date() - 1, 'days').toJSON()))]
-    let res = []
-    meses.forEach(mes => {
-        const filtrado = fechas.filter(fecha => moment(fecha).isBetween(moment(mes), moment(mes).add(1, 'months').subtract(1, 'days')), undefined, '[]').map(el => moment(el))
-        res.push(moment.max(filtrado).toJSON())
-    })
-    return res
-}
-
-const filterDataMaxDates = () => {
-    let datos = JSON.parse(localStorage.getItem('data'))
-    let max = maxDates()
-    return datos.filter(data => max.find(el => el == data.fecha) ? true : false)
-}
-
 const monthlyProfit = () => {
     let inicio = new Date()
     let fin
@@ -734,6 +753,7 @@ const monthlyProfit = () => {
     const fechas = [...new Set(data.map(el => el.fecha))].sort();
     const fondos = [...new Set(data.map(item => item.fondo))].sort();
     const months = [...new Set(fechas.map(el => moment(el).subtract(moment(el).date() - 1, 'days').toJSON()))];
+    months.shift()
     const profits = [];
     fondos.forEach(fondo => {
         let profitsByFondo = [];
@@ -750,14 +770,16 @@ const monthlyProfit = () => {
         profits.push(profitsByFondo)
     })
     fin = new Date()
-    console.log((fin - inicio) / 1000 + " segundos")
+    // console.log((fin - inicio) / 1000 + " segundos")
     return { months, fondos, profits }
 }
 
 const translateDate = input => {
-    let date = moment(input)
-    const monthName = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
-    const newMonth = monthName[date.month()]
+    // let date = moment(input)
+    const month = input.split(' ')[0].toLowerCase()
+    const monName = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+    const mesName = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+    const newMonth = mesName[monName.findIndex(el => el === month)]
     const res = input.replace(/\w{3}/, newMonth)
 
     return res.replace(/(\w{3})\s(\w{1,2}\b)/g, '$2 $1')
@@ -825,6 +847,8 @@ async function setup2() {
         },
         options: {
             animation: {
+                easing: 'easeOutElastic',
+                duration: '1000',
                 onComplete: function (animation) {
                     segundo = new Date;
                     !loaded2 ? console.log('segundo gráfico', (segundo - inicio) / 1000 + " segundos") : "";
