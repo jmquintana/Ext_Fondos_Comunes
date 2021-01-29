@@ -11,25 +11,11 @@ function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado
     this.tenencia = tenencia;
     this.resultado = resultado;
     this.getProfit = () => {
-        // const data = leerLocalStorage();
         const filtro = globalData.filter(registro => registro.fondo === this.fondo);
         const index = filtro.findIndex(el => el.fecha.isSame(this.fecha));
         return (index < filtro.length - 1) ? Math.round(1000 * (this.valor_cp - filtro[index + 1].valor_cp) * filtro[index + 1].cuotapartes) / 1000 : 0;
     };
 };
-// {
-//     const data = leerLocalStorage();
-//     const filtro = data.filter(registro => registro.fondo == this.fondo)
-//     const hoy = this.fecha;
-//     const fechasAnteriores = filtro.map(el => el.fecha).filter(el => el.isBefore(hoy));
-//     if (fechasAnteriores.length) {
-//         const diaAnterior = moment.max(fechasAnteriores);
-//         const datosAnteriores = filtro.filter(el => el.fecha.isSame(diaAnterior));
-//         return Math.round(1000 * (this.valor_cp - datosAnteriores[0].valor_cp) * datosAnteriores[0].cuotapartes) / 1000
-//     } else {
-//         return 0
-//     };
-// };
 
 async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
@@ -51,34 +37,72 @@ async function tablaDia() {
     return registro
 }
 
+function Fondo(fecha, tipo, fondo, valor_cp, lastDay, lastMonth, lastQuarter, lastYear) {
+    this.fecha = fecha;
+    this.tipo = tipo;
+    this.fondo = fondo;
+    this.valor_cp = valor_cp;
+    this.lastDay = lastDay;
+    this.lastMonth = lastMonth;
+    this.lastQuarter = lastQuarter;
+    this.lastYear = lastYear;
+};
+
+async function tablaFondos() {
+    let tablaFondos = document.querySelector("table#info > tbody");
+    let fondos = [];
+    let hoy = await diaF(moment(new Date));
+    if (tablaFondos) {
+        let tipo = "";
+        for (i = 0; i < tablaFondos.childElementCount - 1; i++) {
+            tipo = tablaFondos.children[i].children[0].innerText.trim() === "" ? tipo : tablaFondos.children[i].children[0].innerText.trim();
+            fondos[i] = new Fondo(
+                hoy,
+                tipo,
+                tablaFondos.children[i].children[1].innerText.trim(),
+                parseFloat(tablaFondos.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
+                parseFloat(tablaFondos.children[i].children[3].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
+                parseFloat(tablaFondos.children[i].children[4].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
+                parseFloat(tablaFondos.children[i].children[5].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
+                parseFloat(tablaFondos.children[i].children[6].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
+            )
+        }
+    }
+    return fondos
+}
+
 let inicio
 let primero
 let segundo
 let loaded1 = false
 let loaded2 = false
 let cargado = false;
-// globalData = leerLocalStorage();
+// globalData = leerLocalStorage('data');
 
 async function acciones(e) {
-    if (!cargado && e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
-        console.clear()
-        inicio = new Date()
-        moment.locale('es')
-        console.log('moment.locale(): ', moment.locale());
+    if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         e.preventDefault();
-        let tablaD = await tablaDia();
-        chek(tablaD);
-        guardarTabla(tablaD);
-        mostrarRendimientoFondo();
-        mostrarPorcentajeVariacion(variacionResultado(tablaD));
-        injectChart();
-        const dia = await diaF(moment(new Date));
-        // console.log(dia.format("DD-MM-YYYY"));
-        cargado = true;
-        window.scroll({
-            top: 1000,
-            behavior: 'smooth'
-        });
+        console.clear()
+        moment.locale('es')
+        const tabDia = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
+        const tabFon = document.querySelector("table#info > tbody");
+        if (!cargado && tabDia) {
+            const tablaD = await tablaDia();
+            chek(tablaD);
+            guardarTabla(tablaD);
+            mostrarRendimientoFondo();
+            mostrarPorcentajeVariacion(variacionResultado(tablaD));
+            injectChart();
+            cargado = true;
+            window.scroll({
+                top: 1000,
+                behavior: 'smooth'
+            });
+        } else if (tabFon) {
+            const tablaF = await tablaFondos();
+            guardarFondos(tablaF);
+            cargado = false
+        }
     } else if (e.which == 1 && !window.location.href.includes('fondos-de-inversion')) {
         cargado = false;
     }
@@ -129,7 +153,7 @@ function resultadoTotal(array, fondo = undefined) {
 }
 
 function variacionResultado(tablaD, fondo = undefined) {
-    const tabla = leerLocalStorage();
+    const tabla = leerLocalStorage('data');
 
     const resHoy = fondo ? tabla.filter(el => el.fondo == fondo)[0].tenencia : resultadoTotal(tabla.slice(0, 4));
     const anterior = fondo ? tabla.filter(el => el.fondo == fondo)[1].tenencia : resultadoTotal(tabla.slice(4, 8));
@@ -185,8 +209,8 @@ function mostrarPorcentajeVariacion(variacion) {
     }
 }
 
-function leerLocalStorage() {
-    let data = JSON.parse(localStorage.getItem('data'));
+function leerLocalStorage(name) {
+    let data = JSON.parse(localStorage.getItem(name));
     data ? data.forEach(el => el.fecha = moment(el.fecha)) : data
     return data
 }
@@ -210,9 +234,25 @@ function rebuild() {
     return res
 };
 
+function guardarFondos(tabla) {
+    const name = 'fondos'
+    if (tabla) {
+        const data = leerLocalStorage(name);
+        let dataFiltro = [];
+        if (data)
+            dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
+        tabla.forEach(el => {
+            dataFiltro.unshift(el)
+        });
+        localStorage.setItem(name, JSON.stringify(dataFiltro));
+        console.log('Se guardaron los fondos en la memoria.');
+    }
+    globalData = leerLocalStorage(name);
+}
+
 function guardarTabla(tabla) {
     if (tabla) {
-        const data = leerLocalStorage();
+        const data = leerLocalStorage('data');
         const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
         tabla.forEach(el => {
             dataFiltro.unshift(el)
@@ -220,7 +260,7 @@ function guardarTabla(tabla) {
         localStorage.setItem('data', JSON.stringify(dataFiltro));
         console.log('Se guardaron los datos en la memoria.');
     }
-    globalData = leerLocalStorage();
+    globalData = leerLocalStorage('data');
 }
 
 //funcion diaF contempla días feriados
