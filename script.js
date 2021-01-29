@@ -74,7 +74,7 @@ async function tablaFondos() {
 async function acciones(e) {
     if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         e.preventDefault();
-        console.clear()
+        // console.clear()
         moment.locale('es')
         const tabDia = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
         const tabFon = document.querySelector("table#info > tbody");
@@ -84,15 +84,19 @@ async function acciones(e) {
             guardarFondos(tablaD, 'data');
             mostrarRendimientoFondo();
             mostrarPorcentajeVariacion(variacionResultado(tablaD));
-            injectChart();
+            tabDia ? injectChart() : "";
             cargado = true;
             window.scroll({
                 top: 1000,
                 behavior: 'smooth'
             });
-        } else if (tabFon) {
+        } else if (tabFon && document.querySelectorAll('md-radio-button')[0].classList.contains('md-checked')) {
             const tablaF = await tablaFondos();
-            guardarFondos(tablaF, 'fondos');
+            guardarFondos(tablaF, 'fondosARS');
+            cargado = false
+        } else if (tabFon && document.querySelectorAll('md-radio-button')[1].classList.contains('md-checked')) {
+            const tablaF = await tablaFondos();
+            guardarFondos(tablaF, 'fondosUSD');
             cargado = false
         }
     } else if (e.which == 1 && !window.location.href.includes('fondos-de-inversion')) {
@@ -236,7 +240,7 @@ function guardarFondos(tabla, name) {
             dataFiltro.unshift(el)
         });
         localStorage.setItem(name, JSON.stringify(dataFiltro));
-        console.log(`Se guardaron los fondos en la memoria.`);
+        console.log(`Se guardaron los fondos en la memoria (${name}).`);
     }
     globalData = leerLocalStorage(name);
 }
@@ -322,54 +326,58 @@ function getData(from, to, data) {
 
 function injectChart() {
     const footer = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer")
-    footer.style.height = "1300px"
-    let prevChart = document.querySelector('div.chart-container2');
-    const div1 = document.createElement("div");
-    const div2 = document.createElement("div");
-    const boton1 = document.createElement("button");
-    const boton2 = document.createElement("button");
-    const boton3 = document.createElement("button");
-    const boton4 = document.createElement("button");
-    const boton5 = document.createElement("button");
-    div1.classList.add('chart-container2');
-    div2.classList.add('chart-container3');
-    boton1.id = '10d';
-    boton2.id = '30d';
-    boton3.id = '60d';
-    boton4.id = 'reset';
-    boton5.id = 'borrar';
-    boton1.textContent = '10d';
-    boton2.textContent = '30d';
-    boton3.textContent = '60d';
-    boton4.textContent = 'Reset';
-    boton5.textContent = 'Borrar';
-    boton1.style.margin = '5px';
-    boton2.style.margin = '5px';
-    boton3.style.margin = '5px';
-    boton4.style.margin = '5px';
-    boton5.style.margin = '5px';
-    boton1.classList.add('toggleScale');
-    boton2.classList.add('toggleScale');
-    boton3.classList.add('toggleScale');
-    boton4.classList.add('toggleScale');
-    boton5.classList.add('toggleScale');
-    div1.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
-    div2.innerHTML = `<canvas id="myChart2" aria-label="Hello ARIA World" role="img"></canvas>`;
-    div2.style.marginTop = '50px';
-    if (!prevChart) {
-        footer.appendChild(boton1)
-        footer.appendChild(boton2)
-        footer.appendChild(boton3)
-        footer.appendChild(boton4)
-        // footer.appendChild(boton5)
-        footer.appendChild(div1)
-        footer.appendChild(div2)
+    if (footer) {
+        footer.style.height = "1300px"
+        let prevChart = document.querySelector('div.chart-container2');
+        const div1 = document.createElement("div");
+        const div2 = document.createElement("div");
+        const boton1 = document.createElement("button");
+        const boton2 = document.createElement("button");
+        const boton3 = document.createElement("button");
+        const boton4 = document.createElement("button");
+        const boton5 = document.createElement("button");
+        div1.classList.add('chart-container2');
+        div2.classList.add('chart-container3');
+        boton1.id = '10d';
+        boton2.id = '30d';
+        boton3.id = '60d';
+        boton4.id = 'reset';
+        boton5.id = 'borrar';
+        boton1.textContent = '10d';
+        boton2.textContent = '30d';
+        boton3.textContent = '60d';
+        boton4.textContent = 'Reset';
+        boton5.textContent = 'Borrar';
+        boton1.style.margin = '5px';
+        boton2.style.margin = '5px';
+        boton3.style.margin = '5px';
+        boton4.style.margin = '5px';
+        boton5.style.margin = '5px';
+        boton1.classList.add('toggleScale');
+        boton2.classList.add('toggleScale');
+        boton3.classList.add('toggleScale');
+        boton4.classList.add('toggleScale');
+        boton5.classList.add('toggleScale');
+        div1.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
+        div2.innerHTML = `<canvas id="myChart2" aria-label="Hello ARIA World" role="img"></canvas>`;
+        div2.style.marginTop = '50px';
+        if (!prevChart) {
+            footer.appendChild(boton1)
+            footer.appendChild(boton2)
+            footer.appendChild(boton3)
+            footer.appendChild(boton4)
+            // footer.appendChild(boton5)
+            footer.appendChild(div1)
+            footer.appendChild(div2)
+        } else {
+            return
+        }
+        moment.locale('es')
+        setup();
+        setup2();
     } else {
         return
     }
-    moment.locale('es')
-    setup();
-    setup2();
 }
 
 async function setup() {
