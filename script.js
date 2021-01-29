@@ -71,14 +71,6 @@ async function tablaFondos() {
     return fondos
 }
 
-let inicio
-let primero
-let segundo
-let loaded1 = false
-let loaded2 = false
-let cargado = false;
-// globalData = leerLocalStorage('data');
-
 async function acciones(e) {
     if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
         e.preventDefault();
@@ -89,7 +81,7 @@ async function acciones(e) {
         if (!cargado && tabDia) {
             const tablaD = await tablaDia();
             chek(tablaD);
-            guardarTabla(tablaD);
+            guardarFondos(tablaD, 'data');
             mostrarRendimientoFondo();
             mostrarPorcentajeVariacion(variacionResultado(tablaD));
             injectChart();
@@ -100,7 +92,7 @@ async function acciones(e) {
             });
         } else if (tabFon) {
             const tablaF = await tablaFondos();
-            guardarFondos(tablaF);
+            guardarFondos(tablaF, 'fondos');
             cargado = false
         }
     } else if (e.which == 1 && !window.location.href.includes('fondos-de-inversion')) {
@@ -234,8 +226,7 @@ function rebuild() {
     return res
 };
 
-function guardarFondos(tabla) {
-    const name = 'fondos'
+function guardarFondos(tabla, name) {
     if (tabla) {
         const data = leerLocalStorage(name);
         let dataFiltro = [];
@@ -245,22 +236,9 @@ function guardarFondos(tabla) {
             dataFiltro.unshift(el)
         });
         localStorage.setItem(name, JSON.stringify(dataFiltro));
-        console.log('Se guardaron los fondos en la memoria.');
+        console.log(`Se guardaron los fondos en la memoria.`);
     }
     globalData = leerLocalStorage(name);
-}
-
-function guardarTabla(tabla) {
-    if (tabla) {
-        const data = leerLocalStorage('data');
-        const dataFiltro = data.filter(el => !(moment(el.fecha).isSame(moment(tabla[0].fecha))));
-        tabla.forEach(el => {
-            dataFiltro.unshift(el)
-        });
-        localStorage.setItem('data', JSON.stringify(dataFiltro));
-        console.log('Se guardaron los datos en la memoria.');
-    }
-    globalData = leerLocalStorage('data');
 }
 
 //funcion diaF contempla días feriados
@@ -523,9 +501,6 @@ async function setup() {
                 easing: 'easeOutElastic',
                 duration: '1000',
                 onComplete: function (animation) {
-                    primero = new Date;
-                    !loaded1 ? console.log('primer gráfico', (primero - inicio) / 1000 + " segundos") : "";
-                    loaded1 = true;
                 }
             },
             plugins: {
@@ -787,8 +762,6 @@ const toNumbers = array => array.map(val => val ? val : 0)
 const toMonth = array => array.map(day => moment(day).subtract(moment(day).date() - 1, 'days').toJSON())
 
 const monthlyProfit = () => {
-    let inicio = new Date()
-    let fin
     const data = rebuild();
     const fechas = [...new Set(data.map(el => el.fecha))].sort();
     const fondos = [...new Set(data.map(item => item.fondo))].sort();
@@ -809,8 +782,6 @@ const monthlyProfit = () => {
         })
         profits.push(profitsByFondo)
     })
-    fin = new Date()
-    // console.log((fin - inicio) / 1000 + " segundos")
     return { months, fondos, profits }
 }
 
@@ -890,9 +861,6 @@ async function setup2() {
                 easing: 'easeOutElastic',
                 duration: '1000',
                 onComplete: function (animation) {
-                    segundo = new Date;
-                    !loaded2 ? console.log('segundo gráfico', (segundo - inicio) / 1000 + " segundos") : "";
-                    loaded2 = true;
                 }
             },
             title: {

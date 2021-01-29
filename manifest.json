@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Fondos Comunes Santander",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Herramienta para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
     "icons": {
         "128": "icons/128.png",
