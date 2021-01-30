@@ -21,11 +21,13 @@ async function tablaDia() {
     let tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     let registro = [];
     let hoy = await diaF(moment(new Date));
+    let tipo = "";
     if (tablaHTML) {
         for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
+            tipo = tablaHTML.children[i].children[0].textContent === "" ? tipo : tablaHTML.children[i].children[0].textContent;
             registro[i] = new Registro(
                 hoy,
-                tablaHTML.children[i].children[0].textContent,
+                tipo,
                 tablaHTML.children[i].children[1].textContent,
                 parseFloat(tablaHTML.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".")),
                 parseFloat(tablaHTML.children[i].children[3].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
