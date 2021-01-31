@@ -92,18 +92,27 @@ async function acciones(e) {
                 top: 1000,
                 behavior: 'smooth'
             });
-        } else if (tabFon && document.querySelectorAll('md-radio-button')[0].classList.contains('md-checked')) {
-            const tablaF = await tablaFondos();
-            guardarFondos(tablaF, 'fondosARS');
-            cargado = false
-        } else if (tabFon && document.querySelectorAll('md-radio-button')[1].classList.contains('md-checked')) {
-            const tablaF = await tablaFondos();
-            guardarFondos(tablaF, 'fondosUSD');
-            cargado = false
         }
+        setTimeout(handler, 4000)
     } else if (e.which == 1 && !window.location.href.includes('fondos-de-inversion')) {
         cargado = false;
     }
+}
+
+async function handler() {
+    if (window.location.href.includes('fondos-de-inversion'))
+        if (document.querySelectorAll('.md-nav-item')[1].ariaSelected === "true")
+            if (document.querySelectorAll('md-radio-button')[0].classList.contains('md-checked')) {
+                const tablaF = await tablaFondos();
+                guardarFondos(tablaF, 'fondosARS');
+                cargado = false
+            } else if (document.querySelectorAll('md-radio-button')[1].classList.contains('md-checked')) {
+                const tablaF = await tablaFondos();
+                guardarFondos(tablaF, 'fondosUSD');
+                cargado = false
+            } else {
+                return
+            }
 }
 
 async function mostrarRendimientoFondo() {
