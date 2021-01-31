@@ -11,7 +11,7 @@
     },
     "content_scripts": [{
         "js": ["inject.js"],
-        "css": ["style.css"],
+        "css": ["style.css", "animate.css"],
         "matches": ["https://www2.personas.santander.com.ar/*"]
     }],
     "permissions": [

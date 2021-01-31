@@ -8,3 +8,22 @@ canvas#chart {
 .chart-container3 {
     margin-top: 50px;
 }
+
+/* .popup{
+    z-index: 10;
+} */
+
+/* table.popup td {
+    font-size: 1em;
+    color: rgb(255, 255, 255);
+    vertical-align: text-bottom;
+    user-select: none;
+} */
+
+/* table.popup td:nth-child(1) {
+    text-align: right;
+}
+
+table.popup td:nth-child(2) {
+    text-align: left;
+} */

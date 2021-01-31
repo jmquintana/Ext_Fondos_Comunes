@@ -115,6 +115,81 @@ async function handler() {
             }
 }
 
+//--------------POP UP VOLUMEN-------------------------------
+const popUp = (texto) => {
+    console.log('popUp');
+    const div = document.createElement("div");
+    const prevDiv = document.querySelector('div.popup');
+    let myVar;
+
+    div.classList.add('popup');
+    div.classList.add('animated');
+    div.classList.add('faster');
+    div.classList.add('fadeInDown');
+    div.innerHTML = `   <table class="popup">
+                            <tbody>
+                                <tr>
+                                    <td>${texto}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+
+    if (prevDiv) document.body.removeChild(prevDiv);
+    document.body.appendChild(div);
+    div.style.position = 'fixed';
+    div.style.zIndex = '10';
+    div.style.fontFamily = "Open Sans", "Santander Text";
+    div.style.fontSize = "14px";
+    div.style.fontWeight = "bold";
+    div.style.letterSpacing = "-0.2px";
+    // div.style.height = '65px';
+    div.style.padding = '20px';
+    // div.style.boxShadow = '1px 1px 10px grey';
+    // div.style.boxShadow = '0px 2px 3px 0px rgb(0, 0, 0, 0.3)';
+    div.style.color = 'rgb(51, 51, 51, 1)';
+    // div.style.color = ' rgb(231, 26, 26, 1)';
+    div.style.backgroundColor = 'rgb(234, 234, 234, 0.8)';
+    // div.style.borderBottom = '2px solid rgb(231, 26, 26, 1)';
+    // div.style.boxShadow = '0px 0px 20px rgb(0, 0, 0, 0.1)';
+    div.style.borderRadius = '5px 5px 5px 5px';
+    // div.style.padding = '0.4em';
+    div.style.bottom = `100px`;
+    div.style.right = `100px`;
+
+    function deleteDiv() {
+        myVar = setTimeout(() => div.remove(), 1000)
+    }
+
+    (() => {
+        myVar = setTimeout(() => {
+            div.classList.replace('fadeInDown', 'fadeOut');
+            deleteDiv();
+        }, 3000)
+    })();
+    function myStopFunction() {
+        clearTimeout(myVar);
+    }
+
+    div.addEventListener('mouseover', event => {
+        event.preventDefault();
+        myStopFunction();
+        div.classList.replace('fadeOut', 'fadeIn');
+    });
+
+    div.addEventListener('mouseleave', event => {
+        event.preventDefault();
+        (function () {
+            myVar = setTimeout(() => {
+                div.classList.replace('faster', 'fast');
+                div.classList.replace('fadeInDown', 'fadeOut');
+                div.classList.replace('fadeIn', 'fadeOut');
+                deleteDiv();
+            }, 750);
+        })();
+    });
+}
+
 async function mostrarRendimientoFondo() {
     const tablaD = await tablaDia();
     const dia = await diaF(moment(new Date));
@@ -252,6 +327,7 @@ function guardarFondos(tabla, name) {
         });
         localStorage.setItem(name, JSON.stringify(dataFiltro));
         console.log(`Se guardaron los fondos en la memoria (${name}).`);
+        popUp(`Se guardaron los fondos en la memoria (${name}).`)
     }
     globalData = leerLocalStorage(name);
 }
