@@ -115,13 +115,10 @@ async function handler() {
             }
 }
 
-//--------------POP UP VOLUMEN-------------------------------
 const popUp = (texto) => {
-    console.log('popUp');
     const div = document.createElement("div");
     const prevDiv = document.querySelector('div.popup');
     let myVar;
-
     div.classList.add('popup');
     div.classList.add('animated');
     div.classList.add('faster');
