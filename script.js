@@ -62,7 +62,7 @@ async function tablaFondos() {
                 hoy,
                 tipo,
                 tablaFondos.children[i].children[1].innerText.trim(),
-                parseFloat(tablaFondos.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
+                parseFloat(tablaFondos.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/[u$s]/g, "")),
                 parseFloat(tablaFondos.children[i].children[3].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
                 parseFloat(tablaFondos.children[i].children[4].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
                 parseFloat(tablaFondos.children[i].children[5].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\%/, "")),
