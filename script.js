@@ -1,8 +1,7 @@
-console.log('funciona script.js')
+console.log('script.js loaded')
 document.addEventListener("mouseup", acciones, false);
-let globalData = JSON.parse(localStorage.getItem('data'));
 
-function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado) {
+function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado, previo) {
     this.fecha = fecha;
     this.tipo = tipo;
     this.fondo = fondo;
@@ -10,10 +9,9 @@ function Registro(fecha, tipo, fondo, cuotapartes, valor_cp, tenencia, resultado
     this.valor_cp = valor_cp;
     this.tenencia = tenencia;
     this.resultado = resultado;
+    this.previo = previo;
     this.getProfit = () => {
-        const filtro = globalData.filter(registro => registro.fondo === this.fondo);
-        const index = filtro.findIndex(el => el.fecha.isSame(this.fecha));
-        return (index < filtro.length - 1) ? Math.round(1000 * (this.valor_cp - filtro[index + 1].valor_cp) * filtro[index + 1].cuotapartes) / 1000 : 0;
+        return Math.round(1000 * (this.valor_cp - this.previo.valor_cp) * this.previo.cuotapartes) / 1000 || 0;
     };
 };
 
@@ -22,17 +20,24 @@ async function tablaDia() {
     let registro = [];
     let hoy = await diaF(moment(new Date));
     let tipo = "";
+    let fondo = "";
+    let previo = {};
+    let local = leerLocalStorage('data').filter(el => !moment(el.fecha).isSame(hoy));
     if (tablaHTML) {
         for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
             tipo = tablaHTML.children[i].children[0].textContent === "" ? tipo : tablaHTML.children[i].children[0].textContent;
+            fondo = tablaHTML.children[i].children[1].textContent;
+            previo = local.filter(el => el.fondo === fondo)[0];
+            delete previo.previo
             registro[i] = new Registro(
                 hoy,
                 tipo,
-                tablaHTML.children[i].children[1].textContent,
+                fondo,
                 parseFloat(tablaHTML.children[i].children[2].textContent.replace(/(\.)/, "").replace(/(\,)/, ".")),
                 parseFloat(tablaHTML.children[i].children[3].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
                 parseFloat(tablaHTML.children[i].children[4].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
                 parseFloat(tablaHTML.children[i].children[5].textContent.replace(/(\.)/, "").replace(/(\,)/, ".").replace(/\$/, "")),
+                previo
             )
         }
     }
@@ -93,7 +98,7 @@ async function acciones(e) {
                 behavior: 'smooth'
             });
         }
-        setTimeout(handler, 4000)
+        setTimeout(handler, 2000)
     } else if (e.which == 1 && !window.location.href.includes('fondos-de-inversion')) {
         cargado = false;
     }
@@ -306,7 +311,8 @@ function rebuild() {
                 registro.cuotapartes,
                 registro.valor_cp,
                 registro.tenencia,
-                registro.resultado
+                registro.resultado,
+                registro.previo,
             )
         )
     )
@@ -326,7 +332,6 @@ function guardarFondos(tabla, name) {
         console.log(`Se guardaron los fondos en la memoria (${name}).`);
         popUp(`Se guardaron los fondos en la memoria (${name}).`)
     }
-    globalData = leerLocalStorage(name);
 }
 
 //funcion diaF contempla días feriados
