@@ -18,5 +18,5 @@
         "storage",
         "downloads"
     ],
-    "web_accessible_resources": ["moment-with-locales.min.js", "script.js", "styles.css", "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"]
+    "web_accessible_resources": ["moment-with-locales.min.js", "script.js", "style.css", "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"]
 }

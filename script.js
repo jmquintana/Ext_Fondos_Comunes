@@ -90,7 +90,6 @@ async function acciones(e) {
             chek(tablaD);
             guardarFondos(tablaD, 'data');
             mostrarRendimientoFondo();
-            mostrarPorcentajeVariacion(variacionResultado());
             tabDia ? injectChart() : "";
             cargado = true;
             window.scroll({
@@ -193,8 +192,7 @@ const popUp = (texto) => {
 }
 
 async function mostrarRendimientoFondo() {
-    const tablaD = await tablaDia();
-    const dia = await diaF(moment(new Date));
+    const dia = await diaF(moment());
     const tablaHTML = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody");
     const ultimaCol = document.querySelector("table > thead > tr > th.head-right.last");
     if (ultimaCol) {
@@ -202,35 +200,48 @@ async function mostrarRendimientoFondo() {
         ultimaCol.textContent = `Resultado Diario (%) ${dia.format("DD-MM-YYYY")}`;
     }
     if (tablaHTML) {
-        for (i = 1; i < tablaHTML.childElementCount; i++) {
-            let fondo = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(2)`).innerText;
-            let totalFondoElm = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(7)`);
-            let btn = document.querySelector(`table > tbody > tr:nth-child(${i}) > td.action.body-right > obp-boton`);
+        for (i = 0; i < tablaHTML.childElementCount; i++) {
+            let fondo = tablaHTML.children[i].children[1].textContent.trim();
+            fondo = fondo == "" ? undefined : fondo
+            let totalFondoElm = tablaHTML.children[i].children[6];
+            let obpBtn = totalFondoElm.children[0] || undefined;
+            let btn = obpBtn ? obpBtn.children[0] : undefined;
+            if (!btn) {
+                obpBtn = document.createElement('div')
+                obpBtn.classList.add("div-inline")
+                totalFondoElm.appendChild(obpBtn)
+                obpBtn.style.float = "right"
+                obpBtn.style.width = "134px"
+                obpBtn.style.height = "10px"
+            }
             let { abs, rel } = variacionResultado(fondo);
-            let a = abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            let r = rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            let a = abs.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            let r = rel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             const prevVal = document.querySelector(`#val${i}`);
             if (prevVal)
                 prevVal.remove();
-            const val = document.createElement("a");
+            const val = document.createElement("span");
             val.id = `val${i}`;
             if (abs >= 0) {
-                totalFondoElm.insertBefore(val, btn);
+                totalFondoElm.insertBefore(val, obpBtn);
                 val.innerText = `+${a} (+${r}%)`;
                 val.style.color = "limegreen";
                 val.style.padding = '10px';
             } else {
-                totalFondoElm.insertBefore(val, btn);
+                totalFondoElm.insertBefore(val, obpBtn);
                 val.innerText = `${a} (${r}%)`;
                 val.style.color = "red";
                 val.style.padding = '10px';
             };
-            totalFondoElm.style.textAlign = "left";
+            totalFondoElm.style.textAlign = "right";
+            btn.style.width = '100px'
+            btn.style.height = '40px'
         }
     }
 }
 
 function variacionResultado(fondo = undefined) {
+    fondo = fondo == "" ? undefined : fondo
     let data = rebuild()
     data = data.filter(reg => reg.fecha === data[0].fecha)
     data = fondo ? data.filter(reg => reg.fondo === fondo) : data
@@ -258,23 +269,6 @@ async function chek(tablaD) {
     })
     console.log(tablaD[0].fecha.format('DD/MM/YYYY'))
     console.table(table, ["fondo", "tenencia", "calculo", "dif", "ok"])
-}
-
-function mostrarPorcentajeVariacion(variacion) {
-    const total = document.querySelector("table > tbody > tr.totales > th:nth-child(7)");
-    const abs = variacion.abs.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const rel = variacion.rel.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (total) {
-        if (variacion.abs >= 0) {
-            total.innerText = `+${abs} (+${rel}%)`
-            total.style.color = "limegreen"
-        } else {
-            total.innerText = `${abs} (${rel}%)`
-            total.style.color = "red"
-        };
-        total.style.textAlign = "left"
-        // total.style.fontSize = "16px"
-    }
 }
 
 function leerLocalStorage(name) {

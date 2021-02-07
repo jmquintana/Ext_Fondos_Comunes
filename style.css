@@ -8,6 +8,11 @@ canvas#chart {
 .chart-container3 {
     margin-top: 50px;
 }
+.div-inline { 
+    background-color: red;
+    float:right;
+    height: 20px;
+}
 
 /* .popup{
     z-index: 10;
