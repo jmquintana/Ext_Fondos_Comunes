@@ -90,7 +90,7 @@ async function acciones(e) {
             chek(tablaD);
             guardarFondos(tablaD, 'data');
             mostrarRendimientoFondo();
-            mostrarPorcentajeVariacion(variacionResultado(tablaD));
+            mostrarPorcentajeVariacion(variacionResultado());
             tabDia ? injectChart() : "";
             cargado = true;
             window.scroll({
@@ -206,7 +206,7 @@ async function mostrarRendimientoFondo() {
             let fondo = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(2)`).innerText;
             let totalFondoElm = document.querySelector(`table > tbody > tr:nth-child(${i}) > td:nth-child(7)`);
             let btn = document.querySelector(`table > tbody > tr:nth-child(${i}) > td.action.body-right > obp-boton`);
-            let { abs, rel } = variacionResultado(tablaD, fondo);
+            let { abs, rel } = variacionResultado(fondo);
             let a = abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             let r = rel.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             const prevVal = document.querySelector(`#val${i}`);
@@ -230,32 +230,16 @@ async function mostrarRendimientoFondo() {
     }
 }
 
-function resultadoTotal(array, fondo = undefined) {
-    if (fondo)
-        array = array.filter(el => el.fondo == fondo);
-    return array.reduce((acumulador, { tenencia }) => acumulador + tenencia, 0);
-}
+function variacionResultado(fondo = undefined) {
+    let data = rebuild()
+    data = data.filter(reg => reg.fecha === data[0].fecha)
+    data = fondo ? data.filter(reg => reg.fondo === fondo) : data
+    let actual = data.reduce((acumulador, registro) => acumulador + registro.getProfit(), 0)
+    let anterior = data.reduce((acumulador, registro) => acumulador + registro.previo.tenencia, 0)
 
-function variacionResultado(tablaD, fondo = undefined) {
-    const tabla = leerLocalStorage('data');
-
-    const resHoy = fondo ? tabla.filter(el => el.fondo == fondo)[0].tenencia : resultadoTotal(tabla.slice(0, 4));
-    const anterior = fondo ? tabla.filter(el => el.fondo == fondo)[1].tenencia : resultadoTotal(tabla.slice(4, 8));
-
-    // console.log('Fondo:', fondo)
-    // console.log('Resultado hoy', resHoy)
-    // console.log('Resultado anterior', anterior)
-
-    // const resultadoHoy = resultadoTotal(tablaD, fondo);
-
-    // const hoy = tablaD[0].fecha;
-    // const fechasAnteriores = tabla.map(el => el.fecha).filter(el => el.isBefore(hoy, 'day'));
-    // const diaAnterior = moment.max(fechasAnteriores);
-    // const datosAnteriores = tabla.filter(el => el.fecha.isSame(diaAnterior));
-    // const resultadoAnterior = resultadoTotal(datosAnteriores, fondo);
     return {
-        abs: (resHoy - anterior),
-        rel: (resHoy - anterior) / anterior * 100,
+        abs: actual,
+        rel: actual / anterior * 100,
     };
 }
 
