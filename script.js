@@ -234,8 +234,7 @@ async function mostrarRendimientoFondo() {
                 val.style.padding = '10px';
             };
             totalFondoElm.style.textAlign = "right";
-            btn.style.width = '100px'
-            btn.style.height = '40px'
+            btn ? btn.style.width = '100px' : 0
         }
     }
 }
@@ -264,7 +263,7 @@ async function chek(tablaD) {
         val.tenencia = Math.round(el.tenencia * 100) / 100
         val.calculo = Math.round(el.cuotapartes * el.valor_cp * 100) / 100
         val.dif = Math.round((val.tenencia - val.calculo) * 100) / 100
-        val.ok = Math.abs(val.dif) <= 0.01 ? "✅" : "❌"
+        val.ok = Math.abs(val.dif) <= 0.02 ? "✅" : "❌"
         table.push(val)
     })
     console.log(tablaD[0].fecha.format('DD/MM/YYYY'))
