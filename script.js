@@ -334,15 +334,6 @@ async function diaF(date) {
     }
 }
 
-// document.addEventListener("DOMContentLoaded", function (event) {
-//     console.log('dentro del ready');
-//     var descargar = document.querySelector("#main-view > fondos > div:nth-child(3) > fondos-tenencia > div:nth-child(4) > div > footer");
-//     var btn = document.createElement("a");
-//     descargar.appendChild(btn);
-//     btn.id = "btnExt";
-//     btn.innerText = "Guardar";
-// });
-
 async function isHoliday(fecha) {
     const dia = moment(fecha);
     const year = fecha.getFullYear();
@@ -587,10 +578,6 @@ async function setup() {
                 display: true,
                 text: 'Fondos Comunes de Inversión - ' + type
             },
-            // parsing: {
-            //     xAxisKey: 'cuotapartes',
-            //     yAxisKey: 'resultado'
-            // },
             tooltips: {
                 mode: 'x-axis',
                 intersect: false,
@@ -805,13 +792,9 @@ function addDays(from, chart) {
     allData.holdings.forEach((arr, i) => firstData.holdings[i] = arr.slice(0, allDataLength - chartDataLength));
     allData.values.forEach((arr, i) => firstData.values[i] = arr.slice(0, allDataLength - chartDataLength));
 
-    // console.log('first', firstData)
-
     lastData.days = allData.days.slice(allDataLength - chartDataLength);
     allData.holdings.forEach((arr, i) => lastData.holdings[i] = arr.slice(allDataLength - chartDataLength));
     allData.values.forEach((arr, i) => lastData.values[i] = arr.slice(allDataLength - chartDataLength));
-
-    // console.log('last', lastData)
 
     firstData.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
     chart.data.datasets.filter(dataset => dataset.yAxisID === 'y1').forEach((dataset, i) => {
@@ -851,7 +834,6 @@ const monthlyProfit = () => {
                 return reg.fondo === fondo &&
                     moment(reg.fecha).isBetween(moment(month), moment(month).add(1, 'months').subtract(1, 'days'), undefined, '[]')
             })
-            // console.log(filtered);
             profitsByMonth = filtered.reduce((acc, cur) => acc + cur.getProfit(), 0);
             profitsByFondo.push(Math.round(profitsByMonth * 100) / 100);
         })
@@ -861,7 +843,6 @@ const monthlyProfit = () => {
 }
 
 const translateDate = input => {
-    // let date = moment(input)
     const month = input.split(' ')[0].toLowerCase()
     const monName = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
     const mesName = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
