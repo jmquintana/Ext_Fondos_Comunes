@@ -1,22 +1,25 @@
 {
-    "manifest_version": 2,
-    "name": "Fondos Comunes Santander",
-    "version": "1.1.0",
-    "description": "Herramienta para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
-    "icons": {
-        "128": "icons/128.png",
-        "48": "icons/48.png",
-        "32": "icons/32.png",
-        "16": "icons/16.png"
-    },
-    "content_scripts": [{
-        "js": ["inject.js"],
-        "css": ["animate.css"],
-        "matches": ["https://www2.personas.santander.com.ar/*"]
-    }],
-    "permissions": [
-        "storage",
-        "downloads"
-    ],
-    "web_accessible_resources": ["moment-with-locales.min.js", "script.js", "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"]
+	"manifest_version": 2,
+	"name": "Fondos Comunes Santander",
+	"version": "1.1.0",
+	"description": "Herramienta para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
+	"icons": {
+		"128": "icons/128.png",
+		"48": "icons/48.png",
+		"32": "icons/32.png",
+		"16": "icons/16.png"
+	},
+	"content_scripts": [
+		{
+			"js": ["inject.js"],
+			"css": ["animate.css"],
+			"matches": ["https://www2.personas.santander.com.ar/*"]
+		}
+	],
+	"permissions": ["storage", "downloads"],
+	"web_accessible_resources": [
+		"moment-with-locales.min.js",
+		"script.js",
+		"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+	]
 }

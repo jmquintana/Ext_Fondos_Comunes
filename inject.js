@@ -9,10 +9,10 @@ m.src = chrome.runtime.getURL('moment-with-locales.min.js');
 // n.src = chrome.runtime.getURL('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js');
 
 s.onload = function () {
-    this.remove();
+	this.remove();
 };
 m.onload = function () {
-    this.remove();
+	this.remove();
 };
 // n.onload = function () {
 //     this.remove();
