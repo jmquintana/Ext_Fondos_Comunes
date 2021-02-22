@@ -2,7 +2,7 @@ console.log('script.js loaded');
 document.addEventListener('mouseup', acciones, false);
 sessionStorage.setItem('data', localStorage.getItem('data'));
 sessionStorage.setItem('fondosARS', localStorage.getItem('fondosARS'));
-sessionStorage.setItem('fondosUSD', localStorage.getItem('fondos USD'));
+sessionStorage.setItem('fondosUSD', localStorage.getItem('fondosUSD'));
 
 class Registro {
 	constructor(
