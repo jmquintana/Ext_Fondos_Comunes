@@ -2,7 +2,7 @@ console.log('script.js loaded');
 document.addEventListener('mouseup', acciones, false);
 sessionStorage.setItem('data', localStorage.getItem('data'));
 sessionStorage.setItem('fondosARS', localStorage.getItem('fondosARS'));
-sessionStorage.setItem('fondosUSD', localStorage.getItem('fondos USD'));
+sessionStorage.setItem('fondosUSD', localStorage.getItem('fondosUSD'));
 
 class Registro {
 	constructor(
@@ -45,7 +45,7 @@ async function tablaDia() {
 	let fondo = '';
 	let previo = {};
 	let local = leerLocalStorage('data').filter(
-		(el) => !moment(el.fecha).isSame(hoy)
+		el => !moment(el.fecha).isSame(hoy)
 	);
 	if (tablaHTML) {
 		for (i = 0; i < tablaHTML.childElementCount - 1; i++) {
@@ -54,7 +54,7 @@ async function tablaDia() {
 					? tipo
 					: tablaHTML.children[i].children[0].textContent;
 			fondo = tablaHTML.children[i].children[1].textContent;
-			previo = local.filter((el) => el.fondo === fondo)[0];
+			previo = local.filter(el => el.fondo === fondo)[0];
 			delete previo.previo;
 			registro[i] = new Registro(
 				hoy,
@@ -219,7 +219,7 @@ async function handler() {
 			}
 }
 
-const popUp = (texto) => {
+const popUp = texto => {
 	const div = document.createElement('div');
 	const prevDiv = document.querySelector('div.popup');
 	let myVar;
@@ -272,13 +272,13 @@ const popUp = (texto) => {
 		clearTimeout(myVar);
 	}
 
-	div.addEventListener('mouseover', (event) => {
+	div.addEventListener('mouseover', event => {
 		event.preventDefault();
 		myStopFunction();
 		div.classList.replace('fadeOut', 'fadeIn');
 	});
 
-	div.addEventListener('mouseleave', (event) => {
+	div.addEventListener('mouseleave', event => {
 		event.preventDefault();
 		(function () {
 			myVar = setTimeout(() => {
@@ -353,8 +353,8 @@ async function mostrarRendimientoFondo() {
 function variacionResultado(fondo = undefined) {
 	fondo = fondo == '' ? undefined : fondo;
 	let data = rebuild();
-	data = data.filter((reg) => reg.fecha === data[0].fecha);
-	data = fondo ? data.filter((reg) => reg.fondo === fondo) : data;
+	data = data.filter(reg => reg.fecha === data[0].fecha);
+	data = fondo ? data.filter(reg => reg.fondo === fondo) : data;
 	let actual = data.reduce(
 		(acumulador, registro) => acumulador + registro.getProfit(),
 		0
@@ -389,14 +389,14 @@ async function chek(tablaD) {
 
 function leerLocalStorage(name) {
 	let data = JSON.parse(localStorage.getItem(name));
-	data ? data.forEach((el) => (el.fecha = moment(el.fecha))) : data;
+	data ? data.forEach(el => (el.fecha = moment(el.fecha))) : data;
 	return data;
 }
 
 function rebuild() {
 	const data = JSON.parse(localStorage.getItem('data'));
 	let res = [];
-	data.forEach((registro) =>
+	data.forEach(registro =>
 		res.push(
 			new Registro(
 				registro.fecha,
@@ -419,9 +419,9 @@ function guardarFondos(tabla, name) {
 		let dataFiltro = [];
 		if (data)
 			dataFiltro = data.filter(
-				(el) => !moment(el.fecha).isSame(moment(tabla[0].fecha))
+				el => !moment(el.fecha).isSame(moment(tabla[0].fecha))
 			);
-		tabla.forEach((el) => {
+		tabla.forEach(el => {
 			dataFiltro.unshift(el);
 		});
 		localStorage.setItem(name, JSON.stringify(dataFiltro));
@@ -468,9 +468,9 @@ async function isHoliday(fecha) {
 	);
 	const feriadosJson = await feriados.json();
 	const feriadosMoment = feriadosJson.map(
-		(el) => (el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0]))
+		el => (el = moment([year, el.mes - 1, el.dia, 0, 0, 0, 0]))
 	);
-	const filtrado = feriadosMoment.filter((el) => el.isSame(dia));
+	const filtrado = feriadosMoment.filter(el => el.isSame(dia));
 	return filtrado.length;
 }
 
@@ -480,7 +480,7 @@ function getData(from, to, data) {
 	const datos = from
 		? data
 				.reverse()
-				.filter((el) =>
+				.filter(el =>
 					moment(el.fecha).isBetween(
 						moment(from),
 						moment(to),
@@ -490,7 +490,7 @@ function getData(from, to, data) {
 				)
 		: data.reverse();
 	let array = {};
-	const fondos = [...new Set(datos.map((item) => item.fondo))];
+	const fondos = [...new Set(datos.map(item => item.fondo))];
 	const fechas = datos.reduce((acc, { fecha, fondo, valor_cp, tenencia }) => {
 		(acc[fecha] || (acc[fecha] = [])).push({ fondo, valor_cp, tenencia });
 		return acc;
@@ -499,12 +499,12 @@ function getData(from, to, data) {
 	array.labels = fondos.sort();
 	array.values = [];
 	array.holdings = [];
-	fondos.forEach((fondo) => {
+	fondos.forEach(fondo => {
 		let valores = [];
 		let tenencias = [];
-		Object.keys(fechas).forEach((fecha) => {
+		Object.keys(fechas).forEach(fecha => {
 			let valorDia = fechas[fecha].filter(
-				(elem) => elem.fondo === fondo
+				elem => elem.fondo === fondo
 			)[0];
 			let valor, tenencia;
 			if (valorDia) {
@@ -738,7 +738,7 @@ async function setup() {
 				bodySpacing: 3,
 				borderWidth: 1,
 				callbacks: {
-					title: (tooltipItem) =>
+					title: tooltipItem =>
 						tooltipItem[0]
 							? moment(tooltipItem[0].label)
 									.format('DD MMM YYYY')
@@ -792,7 +792,7 @@ async function setup() {
 						id: 'y',
 						position: 'left',
 						ticks: {
-							callback: (value) =>
+							callback: value =>
 								`${value.toLocaleString('de-DE')}%`,
 						},
 					},
@@ -812,7 +812,7 @@ async function setup() {
 						ticks: {
 							// max: 800000,
 							beginAtZero: true,
-							callback: (value) =>
+							callback: value =>
 								`$ ${value.toLocaleString('de-DE')}`,
 						},
 					},
@@ -826,7 +826,7 @@ async function setup() {
 						offsetGridLines: false,
 						stacked: true,
 						ticks: {
-							callback: (label) => {
+							callback: label => {
 								return translateDate(label);
 							},
 							minor: {
@@ -852,7 +852,7 @@ async function setup() {
 
 	const myChart = new Chart(ctx, config);
 
-	document.querySelectorAll('.toggleScale').forEach((elm) => {
+	document.querySelectorAll('.toggleScale').forEach(elm => {
 		elm.addEventListener('click', function (e) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -898,7 +898,7 @@ async function setup() {
 				'days'
 			);
 			if (dif < 0) {
-				let days = myChart.data.labels.filter((dia) =>
+				let days = myChart.data.labels.filter(dia =>
 					moment(dia).isSameOrBefore(
 						moment(
 							myChart.data.labels[myChart.data.labels.length - 1]
@@ -941,16 +941,16 @@ function delta(arr) {
 function deleteDays(days, chart) {
 	chart.data.labels.splice(0, days);
 	chart.data.datasets
-		.filter((dataset) => dataset.yAxisID === 'y')
-		.forEach((dataset) => {
+		.filter(dataset => dataset.yAxisID === 'y')
+		.forEach(dataset => {
 			dataset.data.splice(0, days);
-			dataset.data = dataset.data.map((point) => {
+			dataset.data = dataset.data.map(point => {
 				return point - dataset.data[0];
 			});
 		});
 	chart.data.datasets
-		.filter((dataset) => dataset.yAxisID === 'y1')
-		.forEach((dataset) => dataset.data.splice(0, days));
+		.filter(dataset => dataset.yAxisID === 'y1')
+		.forEach(dataset => dataset.data.splice(0, days));
 }
 
 function addDays(from, chart) {
@@ -992,23 +992,23 @@ function addDays(from, chart) {
 			(lastData.values[i] = arr.slice(allDataLength - chartDataLength))
 	);
 
-	firstData.days.reverse().forEach((dia) => chart.data.labels.unshift(dia));
+	firstData.days.reverse().forEach(dia => chart.data.labels.unshift(dia));
 	chart.data.datasets
-		.filter((dataset) => dataset.yAxisID === 'y1')
+		.filter(dataset => dataset.yAxisID === 'y1')
 		.forEach((dataset, i) => {
 			firstData.holdings[i]
 				.reverse()
-				.forEach((valor) => dataset.data.unshift(valor));
+				.forEach(valor => dataset.data.unshift(valor));
 		});
 	chart.data.datasets
-		.filter((dataset) => dataset.yAxisID === 'y1')
-		.forEach((dataset) => {
+		.filter(dataset => dataset.yAxisID === 'y1')
+		.forEach(dataset => {
 			dataset.data = toNumbers(dataset.data);
 		});
 	chart.data.datasets
-		.filter((dataset) => dataset.yAxisID === 'y')
+		.filter(dataset => dataset.yAxisID === 'y')
 		.forEach((dataset, i) => {
-			firstData.values[i].reverse().forEach((valor) => {
+			firstData.values[i].reverse().forEach(valor => {
 				dataset.data.unshift(valor);
 			});
 			let k = 0;
@@ -1020,9 +1020,9 @@ function addDays(from, chart) {
 		});
 }
 
-const toNumbers = (array) => array.map((val) => (val ? val : 0));
-const toMonth = (array) =>
-	array.map((day) =>
+const toNumbers = array => array.map(val => (val ? val : 0));
+const toMonth = array =>
+	array.map(day =>
 		moment(day)
 			.subtract(moment(day).date() - 1, 'days')
 			.toJSON()
@@ -1030,11 +1030,11 @@ const toMonth = (array) =>
 
 const monthlyProfit = () => {
 	const data = rebuild();
-	const fechas = [...new Set(data.map((el) => el.fecha))].sort();
-	const fondos = [...new Set(data.map((item) => item.fondo))].sort();
+	const fechas = [...new Set(data.map(el => el.fecha))].sort();
+	const fondos = [...new Set(data.map(item => item.fondo))].sort();
 	const months = [
 		...new Set(
-			fechas.map((el) =>
+			fechas.map(el =>
 				moment(el)
 					.subtract(moment(el).date() - 1, 'days')
 					.toJSON()
@@ -1043,11 +1043,15 @@ const monthlyProfit = () => {
 	];
 	months.shift();
 	const profits = [];
-	fondos.forEach((fondo) => {
+	const holdings = [];
+	const averageReturn = [];
+	fondos.forEach(fondo => {
 		let profitsByFondo = [];
-		months.forEach((month) => {
+		let holdingsByFondo = [];
+		months.forEach(month => {
 			let profitsByMonth = 0;
-			let filtered = data.filter((reg) => {
+			let holdingsByMonth = 0;
+			let filtered = data.filter(reg => {
 				return (
 					reg.fondo === fondo &&
 					moment(reg.fecha).isBetween(
@@ -1063,13 +1067,29 @@ const monthlyProfit = () => {
 				0
 			);
 			profitsByFondo.push(Math.round(profitsByMonth * 100) / 100);
+			holdingsByMonth = filtered.reduce(
+				(acc, cur) => acc + cur.tenencia / moment(month).daysInMonth(),
+				0
+			);
+			holdingsByFondo.push(Math.round(holdingsByMonth * 100) / 100);
 		});
 		profits.push(profitsByFondo);
+		holdings.push(holdingsByFondo);
 	});
-	return { months, fondos, profits };
+	months.forEach((month, i) => {
+		// const averageReturn = [];
+		let pro = 0;
+		let hol = 0;
+		fondos.forEach((fondo, j) => {
+			pro += profits[j][i];
+			hol += holdings[j][i];
+		});
+		averageReturn.push(Math.round((pro / hol) * 10000) / 100);
+	});
+	return { months, fondos, profits, holdings, averageReturn };
 };
 
-const translateDate = (input) => {
+const translateDate = input => {
 	const month = input.split(' ')[0].toLowerCase();
 	const monName = [
 		'jan',
@@ -1099,7 +1119,7 @@ const translateDate = (input) => {
 		'nov',
 		'dic',
 	];
-	const newMonth = mesName[monName.findIndex((el) => el === month)];
+	const newMonth = mesName[monName.findIndex(el => el === month)];
 	const res = input.replace(/\w{3}/, newMonth);
 
 	return res.replace(/(\w{3})\s(\w{1,2}\b)/g, '$2 $1');
@@ -1195,7 +1215,7 @@ async function setup2() {
 				bodySpacing: 3,
 				borderWidth: 1,
 				callbacks: {
-					title: (tooltipItem) =>
+					title: tooltipItem =>
 						tooltipItem[0]
 							? moment(tooltipItem[0].label)
 									.format('MMM YYYY')
@@ -1252,7 +1272,7 @@ async function setup2() {
 						ticks: {
 							// max: 20,
 							beginAtZero: true,
-							callback: (value) =>
+							callback: value =>
 								`$ ${value.toLocaleString('de-DE')}`,
 						},
 					},
@@ -1266,7 +1286,7 @@ async function setup2() {
 						offsetGridLines: true,
 						stacked: false,
 						ticks: {
-							callback: (label) => {
+							callback: label => {
 								return moment(label)
 									.format('MMM YYYY')
 									.replace('.', '');
