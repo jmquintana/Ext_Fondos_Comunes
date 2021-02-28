@@ -20,7 +20,7 @@ class Registro {
 		this.fondo = fondo;
 		this.cuotapartes = cuotapartes;
 		this.valor_cp = valor_cp;
-		this.tenencia = tenencia;
+		this.tenencia = cuotapartes * valor_cp;
 		this.resultado = resultado;
 		this.previo = previo;
 		this.getProfit = () => {
@@ -596,6 +596,10 @@ async function setup() {
 				{
 					type: 'line',
 					order: 0,
+
+					datalabels: {
+						display: false,
+					},
 					label: data.labels[0],
 					data: delta(data.values[0]),
 					fill: false,
@@ -608,6 +612,9 @@ async function setup() {
 				{
 					type: 'line',
 					order: 1,
+					datalabels: {
+						display: false,
+					},
 					label: data.labels[1],
 					data: delta(data.values[1]),
 					fill: false,
@@ -620,6 +627,9 @@ async function setup() {
 				{
 					type: 'line',
 					order: 2,
+					datalabels: {
+						display: false,
+					},
 					label: data.labels[2],
 					data: delta(data.values[2]),
 					fill: false,
@@ -632,6 +642,9 @@ async function setup() {
 				{
 					type: 'line',
 					order: 3,
+					datalabels: {
+						display: false,
+					},
 					label: data.labels[3],
 					data: delta(data.values[3]),
 					fill: false,
@@ -643,6 +656,9 @@ async function setup() {
 				},
 				{
 					type: 'line',
+					datalabels: {
+						display: false,
+					},
 					// fill: '-1',
 					pointRadius: false,
 					showLine: showLine,
@@ -659,6 +675,9 @@ async function setup() {
 				},
 				{
 					type: 'line',
+					datalabels: {
+						display: false,
+					},
 					fill: '-1',
 					pointRadius: false,
 					showLine: showLine,
@@ -675,6 +694,9 @@ async function setup() {
 				},
 				{
 					type: 'line',
+					datalabels: {
+						display: false,
+					},
 					fill: '-1',
 					pointRadius: false,
 					showLine: showLine,
@@ -691,6 +713,9 @@ async function setup() {
 				},
 				{
 					type: 'line',
+					datalabels: {
+						display: false,
+					},
 					fill: '-1',
 					pointRadius: false,
 					showLine: showLine,
@@ -708,6 +733,11 @@ async function setup() {
 			],
 		},
 		options: {
+			plugins: {
+				datalabels: {
+					display: false,
+				},
+			},
 			animation: {
 				easing: 'easeOutElastic',
 				duration: '1000',
@@ -1142,7 +1172,50 @@ async function setup2() {
 			labels: toMonth(data.months),
 			datasets: [
 				{
+					type: 'line',
 					order: 4,
+					stacked: false,
+					// barPercentage: 0.88,
+					// categoryPercentage: 0.96,
+					label: 'Rendimiento Promedio',
+					data: toNumbers(data.returns[4]),
+					borderWidth: borderWidth,
+					borderColor: 'rgba(120, 120, 120, 0.2)',
+					backgroundColor: `rgba(120, 120, 120, 0.2)`,
+					fill: false,
+					datalabels: {
+						display: true,
+						align: 'end',
+						anchor: 'end',
+						rotation: 0,
+						clamp: true,
+						clip: true,
+						color: 'rgba(120, 120, 120, 0.2)',
+						padding: 10,
+						formatter: function (value, context) {
+							// console.log(value);
+							// return value;
+							return (
+								value.toLocaleString('de-DE', {
+									minimumFractionDigits: 2,
+									maximumFractionDigits: 2,
+								}) + '%'
+							);
+						},
+						font: {
+							family: 'Santander Text',
+							size: 48,
+							color: 'rgba(120, 120, 120, 0.2)',
+							weight: 'bold',
+						},
+					},
+					yAxisID: 'y',
+				},
+				{
+					order: 4,
+					datalabels: {
+						display: false,
+					},
 					barPercentage: 0.88,
 					categoryPercentage: 0.96,
 					label: data.fondos[0],
@@ -1155,6 +1228,9 @@ async function setup2() {
 				},
 				{
 					order: 5,
+					datalabels: {
+						display: false,
+					},
 					barPercentage: 0.88,
 					categoryPercentage: 0.96,
 					label: data.fondos[1],
@@ -1167,6 +1243,9 @@ async function setup2() {
 				},
 				{
 					order: 6,
+					datalabels: {
+						display: false,
+					},
 					barPercentage: 0.88,
 					categoryPercentage: 0.96,
 					label: data.fondos[2],
@@ -1179,6 +1258,9 @@ async function setup2() {
 				},
 				{
 					order: 7,
+					datalabels: {
+						display: false,
+					},
 					barPercentage: 0.88,
 					categoryPercentage: 0.96,
 					label: data.fondos[3],
@@ -1192,9 +1274,14 @@ async function setup2() {
 			],
 		},
 		options: {
+			plugins: {
+				datalabels: {
+					display: false,
+				},
+			},
 			animation: {
-				easing: 'easeOutElastic',
-				duration: '1000',
+				easing: 'easeOutQuart',
+				duration: '200',
 				onComplete: function (animation) {},
 			},
 			title: {
@@ -1234,13 +1321,22 @@ async function setup2() {
 						if (label) {
 							label += ': ';
 						}
-						label += `$${tooltipItem.yLabel.toLocaleString(
-							'de-DE',
-							{
-								minimumFractionDigits: 2,
-								maximumFractionDigits: 2,
-							}
-						)}`;
+						label +=
+							tooltipItem.datasetIndex === 0
+								? `${tooltipItem.yLabel.toLocaleString(
+										'de-DE',
+										{
+											minimumFractionDigits: 2,
+											maximumFractionDigits: 2,
+										}
+								  )}%`
+								: `$${tooltipItem.yLabel.toLocaleString(
+										'de-DE',
+										{
+											minimumFractionDigits: 2,
+											maximumFractionDigits: 2,
+										}
+								  )}`;
 						return label;
 					},
 					footer: (tooltipItem, data) => {
@@ -1256,7 +1352,7 @@ async function setup2() {
 					},
 				},
 				filter: function (tooltipItem) {
-					return tooltipItem.datasetIndex < 4;
+					return tooltipItem.datasetIndex < 5;
 				},
 				bodyAlign: 'right',
 				position: 'average',
@@ -1272,6 +1368,25 @@ async function setup2() {
 			},
 			scales: {
 				yAxes: [
+					{
+						id: 'y',
+						position: 'right',
+						stacked: false,
+						ticks: {
+							max: 10,
+							beginAtZero: true,
+							callback: value =>
+								`${value.toLocaleString('de-DE')}%`,
+						},
+						// gridLines: {
+						// 	display: true,
+						// 	drawOnChartArea: true,
+						// 	drawTicks: true,
+						// 	borderDash: [5, 5],
+						// 	borderDashOffset: 0.1,
+						// 	offsetGridLines: false,
+						// },
+					},
 					{
 						id: 'y1',
 						stacked: false,
