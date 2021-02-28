@@ -1044,11 +1044,13 @@ const monthlyProfit = () => {
 	months.shift();
 	const profits = [];
 	const holdings = [];
-	const averageReturn = [];
+	const returns = [];
+	const totalReturns = [];
 	fondos.forEach(fondo => {
-		let profitsByFondo = [];
-		let holdingsByFondo = [];
-		months.forEach(month => {
+		const profitsByFondo = [];
+		const holdingsByFondo = [];
+		const returnByFondo = [];
+		months.forEach((month, i) => {
 			let profitsByMonth = 0;
 			let holdingsByMonth = 0;
 			let filtered = data.filter(reg => {
@@ -1072,21 +1074,25 @@ const monthlyProfit = () => {
 				0
 			);
 			holdingsByFondo.push(Math.round(holdingsByMonth * 100) / 100);
+			returnByFondo.push(
+				Math.round((profitsByMonth / holdingsByMonth) * 10000) / 100
+			);
 		});
 		profits.push(profitsByFondo);
 		holdings.push(holdingsByFondo);
+		returns.push(returnByFondo);
 	});
 	months.forEach((month, i) => {
-		// const averageReturn = [];
 		let pro = 0;
 		let hol = 0;
 		fondos.forEach((fondo, j) => {
 			pro += profits[j][i];
 			hol += holdings[j][i];
 		});
-		averageReturn.push(Math.round((pro / hol) * 10000) / 100);
+		totalReturns.push(Math.round((pro / hol) * 10000) / 100);
 	});
-	return { months, fondos, profits, holdings, averageReturn };
+	returns.push(totalReturns);
+	return { months, fondos, profits, holdings, returns };
 };
 
 const translateDate = input => {
