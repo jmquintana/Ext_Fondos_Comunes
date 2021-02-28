@@ -1181,7 +1181,7 @@ async function setup2() {
 					data: toNumbers(data.returns[4]),
 					borderWidth: borderWidth,
 					borderColor: 'rgba(120, 120, 120, 0.2)',
-					backgroundColor: `rgba(120, 120, 120, 0.2)`,
+					backgroundColor: `rgba(200, 200, 200, 0.6)`,
 					fill: false,
 					datalabels: {
 						display: true,
@@ -1190,7 +1190,7 @@ async function setup2() {
 						rotation: 0,
 						clamp: true,
 						clip: true,
-						color: 'rgba(120, 120, 120, 0.2)',
+						color: 'rgba(200, 200, 200, 0.6)',
 						padding: 10,
 						formatter: function (value, context) {
 							// console.log(value);
@@ -1204,8 +1204,8 @@ async function setup2() {
 						},
 						font: {
 							family: 'Santander Text',
-							size: 48,
-							color: 'rgba(120, 120, 120, 0.2)',
+							size: 36,
+							// color: 'rgba(200, 200, 200, 1)',
 							weight: 'bold',
 						},
 					},
