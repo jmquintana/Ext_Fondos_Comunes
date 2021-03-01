@@ -733,17 +733,15 @@ async function setup() {
 			],
 		},
 		options: {
-			plugins: {
-				datalabels: {
-					display: false,
-				},
-			},
 			animation: {
 				easing: 'easeOutElastic',
 				duration: '1000',
 				onComplete: function (animation) {},
 			},
 			plugins: {
+				datalabels: {
+					display: false,
+				},
 				filler: {
 					propagate: true,
 				},
@@ -1125,22 +1123,21 @@ const monthlyProfit = () => {
 	return { months, fondos, profits, holdings, returns };
 };
 
-const returns = fondos => {
-	const { months, profits, holdings } = monthlyProfit();
-	console.log(months);
-	console.log(profits);
-	console.log(holdings);
+const monthlyReturn = fondosArr => {
+	const { months, fondos, profits, holdings } = monthlyProfit();
+	const selectedFondos = fondosArr ? fondosArr : fondos;
+	const totalReturns = [];
 
 	months.forEach((month, i) => {
 		let pro = 0;
 		let hol = 0;
-		fondos.forEach((fondo, j) => {
+		selectedFondos.forEach((fondo, j) => {
 			pro += profits[j][i];
 			hol += holdings[j][i];
 		});
 		totalReturns.push(Math.round((pro / hol) * 10000) / 100);
 	});
-	returns.push(totalReturns);
+	return totalReturns;
 };
 
 const translateDate = input => {
@@ -1202,7 +1199,7 @@ async function setup2() {
 					backgroundColor: `rgba(200, 200, 200, 0.6)`,
 					fill: false,
 					datalabels: {
-						display: true,
+						display: 'auto',
 						align: 'end',
 						anchor: 'end',
 						rotation: 0,
@@ -1380,6 +1377,27 @@ async function setup2() {
 				display: true,
 				position: 'bottom',
 				itemWidth: 350,
+				onClick: (e, legendItem) => {
+					var index = legendItem.datasetIndex;
+					var ci = myChart2.chart;
+					var meta = ci.getDatasetMeta(index);
+					meta.hidden =
+						meta.hidden === null
+							? !ci.data.datasets[index].hidden
+							: null;
+					ci.update();
+					let fondos = myChart2.legend.legendItems
+						.filter(item => !item.hidden)
+						.map(item => item.text);
+					fondos.shift();
+					let data = monthlyReturn(fondos);
+					console.log(fondos);
+					console.log(data);
+					data
+						? (myChart2.data.datasets[0].data = data)
+						: (myChart2.data.datasets[0].data = []);
+					ci.update();
+				},
 			},
 			hover: {
 				mode: 'x-axis',
@@ -1404,7 +1422,7 @@ async function setup2() {
 						position: 'right',
 						stacked: false,
 						ticks: {
-							max: 10,
+							// max: 10,
 							beginAtZero: true,
 							callback: value =>
 								`${value.toLocaleString('de-DE')}%`,
