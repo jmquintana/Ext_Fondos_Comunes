@@ -1,4 +1,4 @@
-console.log('script.js loaded');
+console.log('script.js');
 document.addEventListener('mouseup', acciones, false);
 sessionStorage.setItem('data', localStorage.getItem('data'));
 sessionStorage.setItem('fondosARS', localStorage.getItem('fondosARS'));
@@ -1125,6 +1125,24 @@ const monthlyProfit = () => {
 	return { months, fondos, profits, holdings, returns };
 };
 
+const returns = fondos => {
+	const { months, profits, holdings } = monthlyProfit();
+	console.log(months);
+	console.log(profits);
+	console.log(holdings);
+
+	months.forEach((month, i) => {
+		let pro = 0;
+		let hol = 0;
+		fondos.forEach((fondo, j) => {
+			pro += profits[j][i];
+			hol += holdings[j][i];
+		});
+		totalReturns.push(Math.round((pro / hol) * 10000) / 100);
+	});
+	returns.push(totalReturns);
+};
+
 const translateDate = input => {
 	const month = input.split(' ')[0].toLowerCase();
 	const monName = [
@@ -1193,8 +1211,6 @@ async function setup2() {
 						color: 'rgba(200, 200, 200, 0.6)',
 						padding: 10,
 						formatter: function (value, context) {
-							// console.log(value);
-							// return value;
 							return (
 								value.toLocaleString('de-DE', {
 									minimumFractionDigits: 2,
@@ -1205,7 +1221,6 @@ async function setup2() {
 						font: {
 							family: 'Santander Text',
 							size: 36,
-							// color: 'rgba(200, 200, 200, 1)',
 							weight: 'bold',
 						},
 					},
@@ -1276,7 +1291,11 @@ async function setup2() {
 		options: {
 			plugins: {
 				datalabels: {
-					display: false,
+					display: true,
+					color: context =>
+						context.hovered
+							? 'rgba(150, 150, 150, 0.6)'
+							: 'rgba(200, 200, 200, 0.6)',
 				},
 			},
 			animation: {
@@ -1365,6 +1384,18 @@ async function setup2() {
 			hover: {
 				mode: 'x-axis',
 				intersect: true,
+			},
+			elements: {
+				line: {
+					tension: 0.5,
+				},
+				point: {
+					intersect: false,
+					mode: 'x-axis',
+					hoverRadius: 3,
+					hitRadius: 0,
+					borderWidth: 1,
+				},
 			},
 			scales: {
 				yAxes: [

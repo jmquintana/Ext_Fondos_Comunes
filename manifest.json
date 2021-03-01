@@ -11,17 +11,15 @@
 	},
 	"content_scripts": [
 		{
-			"js": [
-				"inject.js",
-				"script.js",
-				"moment-with-locales.min.js",
-				"chartjs-min.js",
-				"chartjs-plugin-datalabels.min.js"
-			],
+			"js": ["inject.js"],
 			"css": ["animate.css"],
 			"matches": ["https://www2.personas.santander.com.ar/*"]
 		}
 	],
 	"permissions": ["storage", "downloads"],
-	"web_accessible_resources": []
+	"web_accessible_resources": [
+		"script.js",
+		"moment-with-locales.min.js",
+		"chartjs-plugin-datalabels.min.js"
+	]
 }
