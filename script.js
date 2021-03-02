@@ -1201,7 +1201,7 @@ async function setup2() {
 							);
 						},
 						font: {
-							family: 'Santander Text',
+							family: ['Santander Text', 'Open Sans'],
 							size: 36,
 							weight: 'bold',
 						},
