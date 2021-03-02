@@ -1056,10 +1056,12 @@ const toMonth = array =>
 			.toJSON()
 	);
 
-const monthlyProfit = () => {
+const monthlyProfit = fondosArr => {
 	const data = rebuild();
 	const fechas = [...new Set(data.map(el => el.fecha))].sort();
-	const fondos = [...new Set(data.map(item => item.fondo))].sort();
+	const fondos = fondosArr
+		? fondosArr
+		: [...new Set(data.map(item => item.fondo))].sort();
 	const months = [
 		...new Set(
 			fechas.map(el =>
@@ -1123,23 +1125,6 @@ const monthlyProfit = () => {
 	return { months, fondos, profits, holdings, returns };
 };
 
-const monthlyReturn = fondosArr => {
-	const { months, fondos, profits, holdings } = monthlyProfit();
-	const selectedFondos = fondosArr ? fondosArr : fondos;
-	const totalReturns = [];
-
-	months.forEach((month, i) => {
-		let pro = 0;
-		let hol = 0;
-		selectedFondos.forEach((fondo, j) => {
-			pro += profits[j][i];
-			hol += holdings[j][i];
-		});
-		totalReturns.push(Math.round((pro / hol) * 10000) / 100);
-	});
-	return totalReturns;
-};
-
 const translateDate = input => {
 	const month = input.split(' ')[0].toLowerCase();
 	const monName = [
@@ -1193,7 +1178,7 @@ async function setup2() {
 					// barPercentage: 0.88,
 					// categoryPercentage: 0.96,
 					label: 'Rendimiento Promedio',
-					data: toNumbers(data.returns[4]),
+					data: toNumbers(data.returns[data.returns.length - 1]),
 					borderWidth: borderWidth,
 					borderColor: 'rgba(120, 120, 120, 0.2)',
 					backgroundColor: `rgba(200, 200, 200, 0.6)`,
@@ -1360,6 +1345,7 @@ async function setup2() {
 						return (label =
 							'Total:            $' +
 							tooltipItem
+								.filter((serie, i) => i > 0)
 								.reduce((sum, cur) => cur.yLabel + sum, 0)
 								.toLocaleString('de-DE', {
 									minimumFractionDigits: 2,
@@ -1390,9 +1376,9 @@ async function setup2() {
 						.filter(item => !item.hidden)
 						.map(item => item.text);
 					fondos.shift();
-					let data = monthlyReturn(fondos);
-					console.log(fondos);
-					console.log(data);
+					const filter = monthlyProfit(fondos);
+					const data = filter.returns[filter.returns.length - 1];
+
 					data
 						? (myChart2.data.datasets[0].data = data)
 						: (myChart2.data.datasets[0].data = []);
