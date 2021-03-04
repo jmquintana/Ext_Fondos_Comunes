@@ -1409,18 +1409,17 @@ async function setup2() {
 						stacked: false,
 						ticks: {
 							// max: 10,
+							// stepSize: 1,
 							beginAtZero: true,
 							callback: value =>
 								`${value.toLocaleString('de-DE')}%`,
 						},
-						// gridLines: {
-						// 	display: true,
-						// 	drawOnChartArea: true,
-						// 	drawTicks: true,
-						// 	borderDash: [5, 5],
-						// 	borderDashOffset: 0.1,
-						// 	offsetGridLines: false,
-						// },
+						gridLines: {
+							display: true,
+							drawOnChartArea: false,
+							zeroLineWidth: 1,
+							drawTicks: true,
+						},
 					},
 					{
 						id: 'y1',
