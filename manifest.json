@@ -3,11 +3,17 @@
 	"name": "Fondos Comunes Santander",
 	"version": "1.1.0",
 	"description": "Herramienta para llevar el registro de la evolución de los Fondos de Inversión del Banco Santander.",
+	"browser_action": {
+		"default_title": "My ext"
+	},
 	"icons": {
 		"128": "icons/128.png",
 		"48": "icons/48.png",
 		"32": "icons/32.png",
 		"16": "icons/16.png"
+	},
+	"background": {
+		"page": "background.html"
 	},
 	"content_scripts": [
 		{
@@ -16,7 +22,7 @@
 			"matches": ["https://www2.personas.santander.com.ar/*"]
 		}
 	],
-	"permissions": ["storage", "downloads"],
+	"permissions": ["activeTab", "storage", "background", "downloads"],
 	"web_accessible_resources": [
 		"script.js",
 		"moment-with-locales.min.js",

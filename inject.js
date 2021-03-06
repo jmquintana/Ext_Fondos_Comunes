@@ -19,3 +19,31 @@ o.onload = () => o.remove();
 (document.head || document.documentElement).appendChild(m);
 // (document.head || document.documentElement).appendChild(n);
 (document.head || document.documentElement).appendChild(o);
+
+chrome.runtime.onMessage.addListener(function (arg, sender, sendResponse) {
+	console.log('escucho...');
+	let obj = JSON.parse(arg);
+	console.log(obj);
+	// let blob = new Blob([JSON.stringify(obj, null, 2)], {
+	// 	type: 'application/json',
+	// });
+	// let url = URL.createObjectURL(blob);
+	// // console.log(chrome.downloads);
+	// chrome.downloads.download({
+	// 	url: url, // The object URL can be used as download URL
+	// 	//...
+	// });
+
+	// chrome.downloads.download({
+	// 	url: img_url,
+	// 	filename: saveas,
+	// 	saveAs: false,
+	// });
+	// }
+});
+
+function sendResponse() {
+	console.log('envia respuesta');
+	const data = JSON.parse(localStorage.getItem('data'));
+	chrome.runtime.sendMessage(data);
+}

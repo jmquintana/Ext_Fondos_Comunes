@@ -1462,3 +1462,30 @@ async function setup2() {
 	};
 	const myChart2 = new Chart(ctx, config);
 }
+
+// function download(msg = 'data') {
+// 	const string = 'jkmconndbakckdohemgdjaeglbdmgfip';
+// 	// let param = { extensionId: string, collection: data };
+// 	let data = localStorage.getItem(msg);
+// 	let param = [string, data];
+// 	console.log(param);
+// 	chrome.runtime.sendMessage(...param);
+// }
+
+// chrome.runtime.onMessage.addListener(function (arg, sender, sendResponse) {
+// 	console.log(arg);
+// });
+
+// const download = (data = 'data') => {
+// 	let obj = localStorage.getItem(data);
+// 	// console.log(obj);
+// 	let blob = new Blob([JSON.stringify(obj, null, 2)], {
+// 		type: 'application/json',
+// 	});
+// 	let url = URL.createObjectURL(blob);
+// 	console.log(chrome.downloads);
+// 	chrome.downloads.download({
+// 		url: url, // The object URL can be used as download URL
+// 		//...
+// 	});
+// };
