@@ -1,23 +1,26 @@
 console.log('background.js');
 
-// function sendResponse() {
-// 	chrome.runtime.sendMessage('respuesta');
-// }
+const sendMessage = tab => {
+	// console.log(tab);
+	let msg = { txt: 'data' };
+	chrome.tabs.sendMessage(tab.id, msg);
+};
 
-chrome.browserAction.onClicked.addListener(tab => download());
+chrome.browserAction.onClicked.addListener(sendMessage);
 
-function download(arg = 'data') {
-	console.log('escucho...');
-
-	let data = localStorage.getItem(arg);
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+	let data = msg.data;
 
 	let blob = new Blob([JSON.stringify(data, null, 2)], {
 		type: 'application/json',
 	});
 	let url = URL.createObjectURL(blob);
-	// console.log(chrome.downloads);
 	chrome.downloads.download({
-		url: url, // The object URL can be used as download URL
-		//...
+		url: url,
+		filename: 'data.json',
+		saveAs: false,
 	});
-}
+	sendResponse({
+		responde: 'descargado',
+	});
+});

@@ -20,30 +20,15 @@ o.onload = () => o.remove();
 // (document.head || document.documentElement).appendChild(n);
 (document.head || document.documentElement).appendChild(o);
 
-chrome.runtime.onMessage.addListener(function (arg, sender, sendResponse) {
-	console.log('escucho...');
-	let obj = JSON.parse(arg);
-	console.log(obj);
-	// let blob = new Blob([JSON.stringify(obj, null, 2)], {
-	// 	type: 'application/json',
-	// });
-	// let url = URL.createObjectURL(blob);
-	// // console.log(chrome.downloads);
-	// chrome.downloads.download({
-	// 	url: url, // The object URL can be used as download URL
-	// 	//...
-	// });
-
-	// chrome.downloads.download({
-	// 	url: img_url,
-	// 	filename: saveas,
-	// 	saveAs: false,
-	// });
-	// }
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+	let data = getData(msg.txt);
+	chrome.runtime.sendMessage({
+		response: 'Message received',
+		data: JSON.parse(data),
+	});
 });
 
-function sendResponse() {
-	console.log('envia respuesta');
-	const data = JSON.parse(localStorage.getItem('data'));
-	chrome.runtime.sendMessage(data);
+function getData(arg = 'data') {
+	let data = localStorage.getItem(arg);
+	return data;
 }
