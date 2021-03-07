@@ -59,6 +59,7 @@ button:active {
 button:disabled {
 	background-color: rgb(236, 236, 236);
 	color: rgb(255, 255, 255);
+	cursor: not-allowed;
 }
 
 span {
