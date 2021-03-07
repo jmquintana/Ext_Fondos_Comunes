@@ -3,6 +3,7 @@
 	padding: 0;
 	box-sizing: border-box;
 }
+
 h1 {
 	font-family: 'Open Sans';
 	font-size: 16px;
@@ -43,8 +44,6 @@ button {
 	user-select: none;
 	cursor: pointer;
 	display: flex;
-	/* justify-content: space-evenly; */
-	/* justify-self: right; */
 	align-items: center;
 }
 
@@ -55,6 +54,11 @@ button:hover {
 button:active {
 	border: 0;
 	background-color: #ec0000;
+}
+
+button:disabled {
+	background-color: rgb(236, 236, 236);
+	color: rgb(255, 255, 255);
 }
 
 span {
