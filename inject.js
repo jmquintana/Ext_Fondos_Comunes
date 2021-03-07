@@ -24,6 +24,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 	let data = getData(msg.txt);
 	chrome.runtime.sendMessage({
 		response: 'Message received',
+		name: msg.txt,
 		data: JSON.parse(data),
 	});
 });
