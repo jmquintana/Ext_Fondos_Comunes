@@ -166,12 +166,10 @@ async function tablaFondos() {
 async function acciones(e) {
 	if (e.which == 1 && window.location.href.includes('fondos-de-inversion')) {
 		e.preventDefault();
-		// console.clear()
 		moment.locale('es');
 		const tabDia = document.querySelector(
 			'#main-view > fondos > div:nth-child(3) > fondos-tenencia > div.tabla-contenedor.ng-scope > div.content-cuenta.ng-scope > div > div > div > table > tbody'
 		);
-		const tabFon = document.querySelector('table#info > tbody');
 		if (!cargado && tabDia) {
 			const tablaD = await tablaDia();
 			chek(tablaD);
@@ -244,17 +242,10 @@ const popUp = texto => {
 	div.style.fontSize = '14px';
 	div.style.fontWeight = 'bold';
 	div.style.letterSpacing = '-0.2px';
-	// div.style.height = '65px';
 	div.style.padding = '20px';
-	// div.style.boxShadow = '1px 1px 10px grey';
-	// div.style.boxShadow = '0px 2px 3px 0px rgb(0, 0, 0, 0.3)';
 	div.style.color = 'rgb(51, 51, 51, 1)';
-	// div.style.color = ' rgb(231, 26, 26, 1)';
 	div.style.backgroundColor = 'rgb(234, 234, 234, 0.8)';
-	// div.style.borderBottom = '2px solid rgb(231, 26, 26, 1)';
-	// div.style.boxShadow = '0px 0px 20px rgb(0, 0, 0, 0.1)';
 	div.style.borderRadius = '5px 5px 5px 5px';
-	// div.style.padding = '0.4em';
 	div.style.bottom = `100px`;
 	div.style.right = `100px`;
 
@@ -414,20 +405,25 @@ function rebuild() {
 }
 
 function guardarFondos(tabla, name) {
-	if (tabla) {
-		const data = leerLocalStorage(name);
-		let dataFiltro = [];
-		if (data)
-			dataFiltro = data.filter(
-				el => !moment(el.fecha).isSame(moment(tabla[0].fecha))
-			);
-		tabla.forEach(el => {
-			dataFiltro.unshift(el);
-		});
-		localStorage.setItem(name, JSON.stringify(dataFiltro));
-		sessionStorage.setItem(name, JSON.stringify(dataFiltro));
-		console.log(`Se guardaron los fondos en la memoria (${name}).`);
-		popUp(`Se guardaron los fondos en la memoria (${name}).`);
+	let ahora = moment();
+	if (ahora.hour() >= 8 && ahora.hour() <= 20) {
+		if (tabla) {
+			const data = leerLocalStorage(name);
+			let dataFiltro = [];
+			if (data)
+				dataFiltro = data.filter(
+					el => !moment(el.fecha).isSame(moment(tabla[0].fecha))
+				);
+			tabla.forEach(el => {
+				dataFiltro.unshift(el);
+			});
+			localStorage.setItem(name, JSON.stringify(dataFiltro));
+			sessionStorage.setItem(name, JSON.stringify(dataFiltro));
+			console.log(`Se guardaron los fondos en la memoria (${name}).`);
+			popUp(`Se guardaron los fondos en la memoria (${name}).`);
+		}
+	} else {
+		popUp('Fuera de horario: NO se guardaron los datos');
 	}
 }
 
@@ -538,29 +534,29 @@ function injectChart() {
 		const boton2 = document.createElement('button');
 		const boton3 = document.createElement('button');
 		const boton4 = document.createElement('button');
-		const boton5 = document.createElement('button');
+		// const boton5 = document.createElement('button');
 		div1.classList.add('chart-container2');
 		div2.classList.add('chart-container3');
 		boton1.id = '10d';
 		boton2.id = '30d';
 		boton3.id = '60d';
 		boton4.id = 'reset';
-		boton5.id = 'borrar';
+		// boton5.id = 'borrar';
 		boton1.textContent = '10d';
 		boton2.textContent = '30d';
 		boton3.textContent = '60d';
 		boton4.textContent = 'Reset';
-		boton5.textContent = 'Borrar';
+		// boton5.textContent = 'Borrar';
 		boton1.style.margin = '5px';
 		boton2.style.margin = '5px';
 		boton3.style.margin = '5px';
 		boton4.style.margin = '5px';
-		boton5.style.margin = '5px';
+		// boton5.style.margin = '5px';
 		boton1.classList.add('toggleScale');
 		boton2.classList.add('toggleScale');
 		boton3.classList.add('toggleScale');
 		boton4.classList.add('toggleScale');
-		boton5.classList.add('toggleScale');
+		// boton5.classList.add('toggleScale');
 		div1.innerHTML = `<canvas id="myChart" aria-label="Hello ARIA World" role="img"></canvas>`;
 		div2.innerHTML = `<canvas id="myChart2" aria-label="Hello ARIA World" role="img"></canvas>`;
 		div2.style.marginTop = '50px';
